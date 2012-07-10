@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{61764508-3F6E-474C-A0BF-CEC4833AAF0B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>DevIL</RootNamespace>
+    <SccProjectName>SAK</SccProjectName>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>include;..\libpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>include;..\libpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BrowseInformation>true</BrowseInformation>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="AUTHORS" />
+    <None Include="ChangeLog" />
+    <None Include="COPYING" />
+    <None Include="CREDITS" />
+    <None Include="INSTALL" />
+    <None Include="NEWS" />
+    <None Include="README" />
+    <None Include="ReadMe.txt" />
+    <None Include="TODO" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="altivec_common.c" />
+    <ClCompile Include="altivec_typeconversion.c" />
+    <ClCompile Include="il_alloc.c" />
+    <ClCompile Include="il_bits.c" />
+    <ClCompile Include="il_blp.c" />
+    <ClCompile Include="il_bmp.c" />
+    <ClCompile Include="il_convbuff.c" />
+    <ClCompile Include="il_convert.c" />
+    <ClCompile Include="il_cut.c" />
+    <ClCompile Include="il_dcx.c" />
+    <ClCompile Include="il_dds-save.c" />
+    <ClCompile Include="il_dds.c" />
+    <ClCompile Include="il_devil.c" />
+    <ClCompile Include="il_dicom.c" />
+    <ClCompile Include="il_doom.c" />
+    <ClCompile Include="il_dpx.c" />
+    <ClCompile Include="il_endian.c" />
+    <ClCompile Include="il_error.c" />
+    <ClCompile Include="il_exr.cpp" />
+    <ClCompile Include="il_fastconv.c" />
+    <ClCompile Include="il_files.c" />
+    <ClCompile Include="il_fits.c" />
+    <ClCompile Include="il_ftx.c" />
+    <ClCompile Include="il_gif.c" />
+    <ClCompile Include="il_hdr.c" />
+    <ClCompile Include="il_header.c" />
+    <ClCompile Include="il_icns.c" />
+    <ClCompile Include="il_icon.c" />
+    <ClCompile Include="il_iff.c" />
+    <ClCompile Include="il_ilbm.c" />
+    <ClCompile Include="il_internal.c" />
+    <ClCompile Include="il_io.c" />
+    <ClCompile Include="il_iwi.c" />
+    <ClCompile Include="il_jp2.c" />
+    <ClCompile Include="il_jpeg.c" />
+    <ClCompile Include="il_lif.c" />
+    <ClCompile Include="il_main.c" />
+    <ClCompile Include="il_manip.c" />
+    <ClCompile Include="il_mdl.c" />
+    <ClCompile Include="il_mng.c" />
+    <ClCompile Include="il_mp3.c" />
+    <ClCompile Include="il_neuquant.c" />
+    <ClCompile Include="il_nvidia.cpp" />
+    <ClCompile Include="il_pal.c" />
+    <ClCompile Include="il_pcd.c" />
+    <ClCompile Include="il_pcx.c" />
+    <ClCompile Include="il_pic.c" />
+    <ClCompile Include="il_pix.c" />
+    <ClCompile Include="il_png.c" />
+    <ClCompile Include="il_pnm.c" />
+    <ClCompile Include="il_profiles.c" />
+    <ClCompile Include="il_psd.c" />
+    <ClCompile Include="il_psp.c" />
+    <ClCompile Include="il_pxr.c" />
+    <ClCompile Include="il_quantizer.c" />
+    <ClCompile Include="il_raw.c" />
+    <ClCompile Include="il_rawdata.c" />
+    <ClCompile Include="il_register.c" />
+    <ClCompile Include="il_rle.c" />
+    <ClCompile Include="il_rot.c" />
+    <ClCompile Include="il_sgi.c" />
+    <ClCompile Include="il_size.c" />
+    <ClCompile Include="il_squish.cpp" />
+    <ClCompile Include="il_stack.c" />
+    <ClCompile Include="il_states.c" />
+    <ClCompile Include="il_sun.c" />
+    <ClCompile Include="il_targa.c" />
+    <ClCompile Include="il_texture.c" />
+    <ClCompile Include="il_tiff.c" />
+    <ClCompile Include="il_tpl.c" />
+    <ClCompile Include="il_utility.c" />
+    <ClCompile Include="il_utx.cpp" />
+    <ClCompile Include="il_vtf.c" />
+    <ClCompile Include="il_wal.c" />
+    <ClCompile Include="il_wbmp.c" />
+    <ClCompile Include="il_wdp.c" />
+    <ClCompile Include="il_xpm.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="altivec_common.h" />
+    <ClInclude Include="altivec_typeconversion.h" />
+    <ClInclude Include="il_alloc.h" />
+    <ClInclude Include="il_bits.h" />
+    <ClInclude Include="il_bmp.h" />
+    <ClInclude Include="il_dcx.h" />
+    <ClInclude Include="il_dds.h" />
+    <ClInclude Include="il_doompal.h" />
+    <ClInclude Include="il_dpx.h" />
+    <ClInclude Include="il_endian.h" />
+    <ClInclude Include="il_exr.h" />
+    <ClInclude Include="il_files.h" />
+    <ClInclude Include="il_gif.h" />
+    <ClInclude Include="il_hdr.h" />
+    <ClInclude Include="il_icns.h" />
+    <ClInclude Include="il_icon.h" />
+    <ClInclude Include="il_internal.h" />
+    <ClInclude Include="il_jp2.h" />
+    <ClInclude Include="il_jpeg.h" />
+    <ClInclude Include="il_lif.h" />
+    <ClInclude Include="il_manip.h" />
+    <ClInclude Include="il_mdl.h" />
+    <ClInclude Include="il_pal.h" />
+    <ClInclude Include="il_pcx.h" />
+    <ClInclude Include="il_pic.h" />
+    <ClInclude Include="il_pnm.h" />
+    <ClInclude Include="il_psd.h" />
+    <ClInclude Include="il_psp.h" />
+    <ClInclude Include="il_q2pal.h" />
+    <ClInclude Include="il_register.h" />
+    <ClInclude Include="il_rle.h" />
+    <ClInclude Include="il_sgi.h" />
+    <ClInclude Include="il_stack.h" />
+    <ClInclude Include="il_states.h" />
+    <ClInclude Include="il_targa.h" />
+    <ClInclude Include="il_utx.h" />
+    <ClInclude Include="il_vtf.h" />
+    <ClInclude Include="il_wdp.h" />
+    <ClInclude Include="include\IL\config.h" />
+    <ClInclude Include="include\IL\devil_cpp_wrapper.hpp" />
+    <ClInclude Include="include\IL\devil_internal_exports.h" />
+    <ClInclude Include="include\IL\il.h" />
+    <ClInclude Include="include\IL\ilu.h" />
+    <ClInclude Include="include\IL\ilut.h" />
+    <ClInclude Include="include\IL\ilut_config.h" />
+    <ClInclude Include="include\IL\ilu_region.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
