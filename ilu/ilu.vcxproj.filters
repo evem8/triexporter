@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\ilu_error">
+      <UniqueIdentifier>{890ac115-3664-487e-a1b8-1d9e3119d387}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -85,6 +88,27 @@
     </ClInclude>
     <ClInclude Include="ilu_states.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ilu_error\ilu_err-arabic.h">
+      <Filter>Header Files\ilu_error</Filter>
+    </ClInclude>
+    <ClInclude Include="ilu_error\ilu_err-dutch.h">
+      <Filter>Header Files\ilu_error</Filter>
+    </ClInclude>
+    <ClInclude Include="ilu_error\ilu_err-english.h">
+      <Filter>Header Files\ilu_error</Filter>
+    </ClInclude>
+    <ClInclude Include="ilu_error\ilu_err-french.h">
+      <Filter>Header Files\ilu_error</Filter>
+    </ClInclude>
+    <ClInclude Include="ilu_error\ilu_err-german.h">
+      <Filter>Header Files\ilu_error</Filter>
+    </ClInclude>
+    <ClInclude Include="ilu_error\ilu_err-japanese.h">
+      <Filter>Header Files\ilu_error</Filter>
+    </ClInclude>
+    <ClInclude Include="ilu_error\ilu_err-spanish.h">
+      <Filter>Header Files\ilu_error</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

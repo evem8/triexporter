@@ -116,6 +116,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ilu_alloc.h" />
+    <ClInclude Include="ilu_error\ilu_err-arabic.h" />
+    <ClInclude Include="ilu_error\ilu_err-dutch.h" />
+    <ClInclude Include="ilu_error\ilu_err-english.h" />
+    <ClInclude Include="ilu_error\ilu_err-french.h" />
+    <ClInclude Include="ilu_error\ilu_err-german.h" />
+    <ClInclude Include="ilu_error\ilu_err-japanese.h" />
+    <ClInclude Include="ilu_error\ilu_err-spanish.h" />
     <ClInclude Include="ilu_filter.h" />
     <ClInclude Include="ilu_internal.h" />
     <ClInclude Include="ilu_region.h" />
