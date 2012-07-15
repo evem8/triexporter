@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\DevIL\include;..\DX9;..\fbxsdk\include;..\WTL;..\"
+				AdditionalIncludeDirectories="..\DevIL\include;..\DX9;..\fbxsdk\include;..\WTL;.."
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;TANGENT;SCALE_AND_CENTER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -119,7 +119,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\DevIL\include;..\DX9;..\fbxsdk\include;..\WTL;..\"
+				AdditionalIncludeDirectories="..\DevIL\include;..\DX9;..\fbxsdk\include;..\WTL;.."
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TANGENT;SCALE_AND_CENTER"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"

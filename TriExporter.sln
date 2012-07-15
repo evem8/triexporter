@@ -328,15 +328,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{0703
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{7165C775-51B0-41D0-BE6E-CC1CB5007AD9}"
 	ProjectSection(SolutionItems) = preProject
-		fbxsdk\x86\fbxsdk-2013.2-md.lib = fbxsdk\x86\fbxsdk-2013.2-md.lib
-		fbxsdk\x86\fbxsdk-2013.2-mdd.lib = fbxsdk\x86\fbxsdk-2013.2-mdd.lib
-		fbxsdk\x86\fbxsdk-2013.2-mt.lib = fbxsdk\x86\fbxsdk-2013.2-mt.lib
-		fbxsdk\x86\fbxsdk-2013.2-mtd.lib = fbxsdk\x86\fbxsdk-2013.2-mtd.lib
-		fbxsdk\x86\fbxsdk-2013.2.dll = fbxsdk\x86\fbxsdk-2013.2.dll
-		fbxsdk\x86\fbxsdk-2013.2.lib = fbxsdk\x86\fbxsdk-2013.2.lib
-		fbxsdk\x86\fbxsdk-2013.2d.dll = fbxsdk\x86\fbxsdk-2013.2d.dll
-		fbxsdk\x86\fbxsdk-2013.2d.lib = fbxsdk\x86\fbxsdk-2013.2d.lib
-		fbxsdk\x86\fbxsdk-2013.2d.pdb = fbxsdk\x86\fbxsdk-2013.2d.pdb
+		fbxsdk\lib\vs2008\x86\fbxsdk-2013.2-mt.lib = fbxsdk\lib\vs2008\x86\fbxsdk-2013.2-mt.lib
+		fbxsdk\lib\vs2008\x86\fbxsdk-2013.2-mtd.lib = fbxsdk\lib\vs2008\x86\fbxsdk-2013.2-mtd.lib
+		fbxsdk\lib\vs2010\x86\fbxsdk-2013.2-mt.lib = fbxsdk\lib\vs2010\x86\fbxsdk-2013.2-mt.lib
+		fbxsdk\lib\vs2010\x86\fbxsdk-2013.2-mtd.lib = fbxsdk\lib\vs2010\x86\fbxsdk-2013.2-mtd.lib
 	EndProjectSection
 EndProject
 Global
