@@ -20,9 +20,15 @@ bool GrannyTriFile::LoadFile(StuffFileEntry &sfe)
 
 	header.numVertices = (*GrannyGetMeshVertexCount)(mesh);
 	t_Groups* triangleGroups = (*GrannyGetMeshTriangleGroups)(mesh);
-	
-	//header.sizeVertex = 32;
+
+#if TANGENT_AND_BINORMAL
+	header.sizeVertex = 56;
+#elif TANGENT
 	header.sizeVertex = 44;
+#else
+	header.sizeVertex = 32;
+#endif
+
 	numTriangles = (*GrannyGetMeshTriangleCount)(mesh);
 	header.numTriangles = numTriangles;
 	header.numSurfaces = (*GrannyGetMeshTriangleGroupCount)(mesh);
@@ -47,11 +53,32 @@ bool GrannyTriFile::LoadFile(StuffFileEntry &sfe)
 			triangles[i][j][2] = ind[w+2];
 		}
 	}
-	//m_vertices = new Vertex[header.numVertices];
-	//(*GrannyCopyMeshVertices)(mesh, GrannyPNT332VertexType, m_vertices);
-	m_vertices = new VertexPNTG[header.numVertices];
-	(*GrannyCopyMeshVertices)(mesh, GrannyPNTG3323VertexType, m_vertices);
+	m_vertices = new Vertex[header.numVertices];
+
+#if TANGENT_AND_BINORMAL
+	(*GrannyCopyMeshVertices)(mesh, GrannyPNGBT33332VertexType, m_vertices);
+#elif TANGENT
+	(*GrannyCopyMeshVertices)(mesh, GrannyPNGT3332VertexType, m_vertices);
+#else
+	(*GrannyCopyMeshVertices)(mesh, GrannyPNT332VertexType, m_vertices);
+#endif
+
 	(*GrannyFreeFile)(file);
+
+	// Calculate values of bounding box
+	for (unsigned int i = 0; i < header.numVertices; i++)
+	{
+		for (unsigned int x = 0; x < 3 ; x++)
+		{
+			float currpos = m_vertices[i].vertexPosition[x];
+
+			if(header.minBox[x] > currpos)
+				header.minBox[x] = currpos;
+			if(header.maxBox[x] < currpos)
+				header.maxBox[x] = currpos;
+		}
+	}
+
 	return true;
 }
 

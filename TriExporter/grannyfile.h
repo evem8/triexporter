@@ -4,7 +4,6 @@
 #include "trifile.h"
 
 
-
 class GrannyTriFile : public TriFile
 {
 	public:
@@ -12,8 +11,8 @@ class GrannyTriFile : public TriFile
 		virtual bool LoadFile(StuffFileEntry &sfe);
 		virtual bool LoadFile(string filename);
 		virtual bool LoadFile(ifstream &is);
+
 	private:
 		static bool loadedstuff;
 		static bool dllloaded;
-	
 };

@@ -122,7 +122,30 @@ void CMainDlg::Load(int out)
 	VCount.Format("%i", file->header.numVertices);
 	BoxMax.Format("{%1.2f; %1.2f; %1.2f}", file->header.maxBox[0], file->header.maxBox[1], file->header.maxBox[2]);
 	BoxMin.Format("{%1.2f; %1.2f; %1.2f}", file->header.minBox[0], file->header.minBox[1], file->header.minBox[2]);
-	SurCount.Format("%i", file->header.numSurfaces);			
+	SurCount.Format("%i", file->header.numSurfaces);
+
+	// Loop through Checkboxes
+	for(dword i=0; i<10; i++)
+	{
+		// Get current Checkbox
+		CButton currButton = m_ChkSurfaces[i];
+
+		// If the current model uses this surface, enable the checkbox and set it
+		if(i < file->header.numSurfaces)
+		{
+			currButton.EnableWindow(true);
+			currButton.SetCheck(true);
+			m_p3d.drawSurface[i] = 1;
+		}
+		// Clear and disable the rest
+		else
+		{
+			currButton.EnableWindow(false);
+			currButton.SetCheck(false);
+			m_p3d.drawSurface[i] = 0;
+		}
+	}
+
 	m_VSize.SetWindowText(VSize);
 	m_TriVersion.SetWindowText(TriVersion);
 	m_VCount.SetWindowText(VCount);
@@ -204,6 +227,15 @@ LRESULT CMainDlg::OnSelect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
 	return 0;
 }
 
+LRESULT CMainDlg::OnSurfaces(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	// Update all Checkboxes
+	for(int i=0; i<10; i++)
+		m_p3d.drawSurface[i] = m_ChkSurfaces[i].GetCheck();
+
+	return 0;
+}
+
 LRESULT CMainDlg::OnOpenTri(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	CFileDialog fd(TRUE, 0, 0, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "All files (*.tri)\0*.tri\0\0");
@@ -223,16 +255,16 @@ LRESULT CMainDlg::OnWireOnOff(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl
 }
 LRESULT CMainDlg::OnExport(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	CFileDialog fd(FALSE, 0, 0, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "X files (*.x)\0*.x\0Obj files (*.obj)\0*.obj\0\x33\x64s files (*.3ds)\0*.3ds\0My files (*.my)\0*.my\0Android3D files (*.a3d)\0*.a3d\0FBX files (*.fbx)\0*.fbx\0\0");
+	CFileDialog fd(FALSE, 0, 0, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "X files (*.x)\0*.x\0Obj files (*.obj)\0*.obj\0\x33\x64s files (*.3ds)\0*.3ds\0My files (*.my)\0*.my\0VBO files (*.vbo)\0*.vbo\0Android3D files (*.a3d)\0*.a3d\0FBX files (*.fbx)\0*.fbx\0\0");
 	if(fd.DoModal(this->m_hWnd)!= IDCANCEL)
 	{
-		void (TriFile::*Export[])(float, string, string)={NULL, &TriFile::ExportX,&TriFile::ExportObj,&TriFile::Export3ds,&TriFile::ExportMy, &TriFile::ExportA3D, &TriFile::ExportFBX};
-		CString ext[] = {"",".x", ".obj", ".3ds", ".my", ".a3d", ".fbx"};
-		int extl[] = {0,2,4,4,3,4, 4};
+		void (TriFile::*Export[])(float, string, string)={NULL, &TriFile::ExportX, &TriFile::ExportObj, &TriFile::Export3ds, &TriFile::ExportMy, &TriFile::ExportVbo, &TriFile::ExportA3D, &TriFile::ExportFBX};
+		CString ext[] = {"",".x", ".obj", ".3ds", ".my", ".vbo", ".a3d", ".fbx"};
+		int extl[] = {0, 2, 4, 4, 3, 4, 4, 4};
 		CString efile = fd.m_szFileTitle;
 		CString efilepath = fd.m_szFileName;
 		CString msg;
-		msg.Format("Export to %s file complited!", ext[fd.m_ofn.nFilterIndex].Right(extl[fd.m_ofn.nFilterIndex]-1));
+		msg.Format("Export to %s file completed!", ext[fd.m_ofn.nFilterIndex].Right(extl[fd.m_ofn.nFilterIndex]-1));
 		int lf = efile.GetLength();
 		efilepath.Delete(efilepath.GetLength() - lf, lf);
 		if(!efile.Right(extl[fd.m_ofn.nFilterIndex]).Compare(ext[fd.m_ofn.nFilterIndex]))
@@ -485,7 +517,7 @@ void CMainDlg::FillTree()
 		fe.SetData(i+1);
 	}
 }
-	
+
 LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	// center the dialog on the screen
@@ -532,6 +564,9 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	m_Add.Attach(GetDlgItem(IDC_ADD));
 	m_Remove.Attach(GetDlgItem(IDC_REMOVE));
 	m_Select.Attach(GetDlgItem(IDC_SELECT));
+	// Attach all 10 Checkboxes
+	for(int i=0; i<10; i++)
+		m_ChkSurfaces[i].Attach(GetDlgItem(IDC_SURFACE1+i));
 	m_Scale.SetRange(0, 19);
 	m_Scale.SetPageSize(5);
 	m_UpDown.Attach(GetDlgItem(IDC_UPDOWN));

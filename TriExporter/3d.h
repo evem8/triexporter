@@ -35,6 +35,7 @@ public:
 	bool loaded;
 	int m_lMousex;
 	int m_lMousey;
+	int drawSurface[10];
 	bool rotation;
 	D3DXVECTOR3 vCenter;
 	D3DXMATRIXA16 matWorld;

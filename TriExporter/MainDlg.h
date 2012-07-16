@@ -36,6 +36,7 @@ private:
 	CButton m_Add;
 	CButton m_Remove;
 	CButton m_Select;
+	CButton m_ChkSurfaces[10];
 	TriFile* file;
 	StuffFile sf;
 	CImageList il;
@@ -59,6 +60,16 @@ public:
 		COMMAND_ID_HANDLER(ID_FILE_OPENTRI, OnOpenTri)
 		COMMAND_ID_HANDLER(IDC_REMOVE, OnRemove)
 		COMMAND_ID_HANDLER(IDC_SELECT, OnSelect)
+		COMMAND_ID_HANDLER(IDC_SURFACE1, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE2, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE3, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE4, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE5, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE6, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE7, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE8, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE9, OnSurfaces)
+		COMMAND_ID_HANDLER(IDC_SURFACE10, OnSurfaces)
 		COMMAND_ID_HANDLER(ID_FILE_EXIT, OnCancel)
 		MESSAGE_HANDLER(WM_HSCROLL, OnScaleTrack)
 		MESSAGE_HANDLER(WM_VSCROLL, OnScaleTrack)
@@ -90,6 +101,7 @@ public:
 	void Add(const CString &texture,int data = -1);
 	LRESULT OnAdd(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnRemove(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnSurfaces(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	void EnableAll(BOOL bEnable=1);
 	void FillTree();
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);

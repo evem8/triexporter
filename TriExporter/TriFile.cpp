@@ -58,24 +58,16 @@ bool TriFile::LoadFile(ifstream &is)
 	surfaces.resize(header.numSurfaces);
 	switch(header.sizeVertex)
 	{
-		case 32:
+#if TANGENT_AND_BINORMAL
+		case 56: /* PNGBT */
+#elif TANGENT
+		case 44: /* PNGT */
+#else
+		case 32: /* PNT */
+#endif
 			m_vertices = new Vertex[header.numVertices];
 			break;
-		case 40:
-			m_vertices = new CVertex<40>[header.numVertices];
-			break;
-		case 48:
-			m_vertices = new CVertex<48>[header.numVertices];
-			break;
-		case 56:
-			m_vertices = new CVertex<56>[header.numVertices];
-			break;
-		case 64:
-			m_vertices = new CVertex<64>[header.numVertices];
-			break;
-		case 72:
-			m_vertices = new CVertex<72>[header.numVertices];
-			break;
+
 		default:
 			return false;
 	}
@@ -146,6 +138,7 @@ bool TriFile::LoadFile(ifstream &is)
 	}
 	return true;
 }
+
 void TriFile::ExportX(float size, string file, string dir)
 {
 	string xheader = "xof 0303txt 0032\ntemplate Vector {\n <3d82ab5e-62da-11cf-ab39-0020af71e433>\n FLOAT x;\n FLOAT y;\n FLOAT z;\n}\n\ntemplate MeshFace {\n <3d82ab5f-62da-11cf-ab39-0020af71e433>\n DWORD nFaceVertexIndices;\n array DWORD faceVertexIndices[nFaceVertexIndices];\n}\n\ntemplate Mesh {\n <3d82ab44-62da-11cf-ab39-0020af71e433>\n DWORD nVertices;\n array Vector vertices[nVertices];\n DWORD nFaces;\n array MeshFace faces[nFaces];\n [...]\n}\n\ntemplate MeshNormals {\n <f6f23f43-7686-11cf-8f52-0040333594a3>\n DWORD nNormals;\n array Vector normals[nNormals];\n DWORD nFaceNormals;\n array MeshFace faceNormals[nFaceNormals];\n}\n\ntemplate Coords2d {\n <f6f23f44-7686-11cf-8f52-0040333594a3>\n FLOAT u;\n FLOAT v;\n}\n\ntemplate MeshTextureCoords {\n <f6f23f40-7686-11cf-8f52-0040333594a3>\n DWORD nTextureCoords;\n array Coords2d textureCoords[nTextureCoords];\n}\n\ntemplate ColorRGBA {\n <35ff44e0-6c7c-11cf-8f52-0040333594a3>\n FLOAT red;\n FLOAT green;\n FLOAT blue;\n FLOAT alpha;\n}\n\ntemplate ColorRGB {\n <d3e16e81-7835-11cf-8f52-0040333594a3>\n FLOAT red;\n FLOAT green;\n FLOAT blue;\n}\n\ntemplate Material {\n <3d82ab4d-62da-11cf-ab39-0020af71e433>\n ColorRGBA faceColor;\n FLOAT power;\n ColorRGB specularColor;\n ColorRGB emissiveColor;\n [...]\n}\n\ntemplate MeshMaterialList {\n <f6f23f42-7686-11cf-8f52-0040333594a3>\n DWORD nMaterials;\n DWORD nFaceIndexes;\n array DWORD faceIndexes[nFaceIndexes];\n [Material <3d82ab4d-62da-11cf-ab39-0020af71e433>]\n}\n\ntemplate TextureFilename {\n <a42790e1-7810-11cf-8f52-0040333594a3>\n STRING filename;\n}\n\n\nMesh {\n";
@@ -225,6 +218,7 @@ void TriFile::ExportX(float size, string file, string dir)
 	out << xfooter;
 	out.close();
 }
+
 void TriFile::ExportMy(float size, string file, string dir)
 {
 	ofstream out;
@@ -293,6 +287,155 @@ void TriFile::ExportMy(float size, string file, string dir)
 	out.close();
 }
 
+template <typename T> void swap_endian(T& pX)
+{
+	char& raw = reinterpret_cast<char&>(pX);
+	std::reverse(&raw, &raw + sizeof(T));
+}
+
+void TriFile::ExportVbo(float size, string file, string dir)
+{
+	char file_id[11] = "VBO_ToLuSe";
+	int file_version = 3;
+	float mesh_scale = size;
+	int mesh_elements = header.numVertices;
+	int mesh_surfaces = header.numSurfaces;
+	int mesh_faces_of_surface = 0;
+	int mesh_faces = 0;
+	byte index_type;
+
+#if SCALE_AND_CENTER
+	// Center model in the middle of the bounding box
+	float offsetX = - ( header.minBox[0] + header.maxBox[0] ) / 2;
+	float offsetY = - ( header.minBox[1] + header.maxBox[1] ) / 2;
+	float offsetZ = - ( header.minBox[2] + header.maxBox[2] ) / 2;
+
+	// Scale model by average size in x and y direction
+	float deltaX = header.maxBox[0] - header.minBox[0];
+	float deltaY = header.maxBox[1] - header.minBox[1];
+	float autoscale = 7.5f / ((deltaX+deltaY)/2);
+	mesh_scale *= autoscale;
+
+	// Only shrink
+	if (1.0f < mesh_scale)
+		mesh_scale = size;
+#else
+	float offsetX = 0.0f;
+	float offsetY = 0.0f;
+	float offsetZ = 0.0f;
+#endif
+
+	ofstream out;
+	out.sync_with_stdio(false);
+	out.open((dir + file + ".vbo").c_str(), std::ios::binary | std::ios::ate);
+
+	// Write file_id
+	out.write(reinterpret_cast<char*>(&file_id), sizeof(file_id)-1);
+
+	// Write file_version
+	swap_endian(file_version);
+	out.write(reinterpret_cast<char*>(&file_version), sizeof(file_version));
+
+	// Write mesh_scale
+	float mesh_scale_big = mesh_scale;
+	swap_endian(mesh_scale_big);
+	out.write(reinterpret_cast<char*>(&mesh_scale_big), sizeof(mesh_scale_big));
+	
+	// Write mesh_elements
+	swap_endian(mesh_elements);
+	out.write(reinterpret_cast<char*>(&mesh_elements), sizeof(mesh_elements));
+
+	// Write mesh_surfaces
+	swap_endian(mesh_surfaces);
+	out.write(reinterpret_cast<char*>(&mesh_surfaces), sizeof(mesh_scale));
+
+	// Write mesh_faces[mesh_surfaces]
+	for(dword i = 0; i < header.numSurfaces; i++)
+	{
+		mesh_faces_of_surface = surfaces[i].numTriangles;
+		swap_endian(mesh_faces_of_surface);
+		out.write(reinterpret_cast<char*>(&mesh_faces_of_surface), sizeof(mesh_faces_of_surface));
+
+		// Calculate total number of faces
+		mesh_faces += surfaces[i].numTriangles;
+	}
+
+	// Set packing of indexes
+	if( mesh_faces * 3 > 65535 )
+	{
+		// Pack indexes as unsigned int
+		index_type = 0;
+	}
+	else
+	{
+		// Pack indexes as unsigned short
+		index_type = 1;
+	}
+
+	// Write index_type
+	out.write(reinterpret_cast<char*>(&index_type), sizeof(index_type));
+
+	// For all vertices
+	for(dword i = 0; i < header.numVertices; i ++)
+	{
+		// Write vertex_coordinates
+		float fo = (vertices(i)->vertexPosition[0]+offsetX)*mesh_scale;
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		fo = (vertices(i)->vertexPosition[1]+offsetY)*mesh_scale;
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		fo = (vertices(i)->vertexPosition[2]+offsetZ)*mesh_scale;
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+
+		// Write vertex_normals
+		fo = vertices(i)->vertexNormal[0];
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		fo = vertices(i)->vertexNormal[1];
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		fo = vertices(i)->vertexNormal[2];
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+
+		// Write vertex_uv
+		fo =  vertices(i)->vertexUV[0];
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		fo =  vertices(i)->vertexUV[1];
+		swap_endian(fo);
+		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+	}
+
+	// For all surfaces
+	for(dword i = 0; i < header.numSurfaces; i++)
+	{
+		for(dword c = 0; c < surfaces[i].numTriangles; c ++)
+		{
+			// Write faces
+			for(int d = 0; d < 3; d++)
+			{
+				if (0 == index_type)
+				{
+					unsigned int p = (unsigned int) triangles[i][c][d];
+					swap_endian(p);
+					out.write(reinterpret_cast<char*>(&p), sizeof(unsigned int));
+				}
+				else
+				{
+					unsigned short p = (unsigned short) triangles[i][c][d];
+					swap_endian(p);
+					out.write(reinterpret_cast<char*>(&p), sizeof(unsigned short));
+				}
+			}
+		}
+	}
+
+	out.close();
+}
+
 void TriFile::ExportObj(float size, string file, string dir)
 {
 	ofstream out;
@@ -303,12 +446,33 @@ void TriFile::ExportObj(float size, string file, string dir)
 	outmtl.open((dir + file + ".mtl").c_str());
 	out << "mtllib " << file << ".mtl" << endl;
 	out << "g shape" << endl;
+
+#if 0 // SCALE_AND_CENTER
+	// Center model in the middle of the bounding box
+	float offsetX = - ( header.minBox[0] + header.maxBox[0] ) / 2;
+	float offsetY = - ( header.minBox[1] + header.maxBox[1] ) / 2;
+	float offsetZ = - ( header.minBox[2] + header.maxBox[2] ) / 2;
+
+	// Scale model by average size in x and y direction
+	float deltaX = header.maxBox[0] - header.minBox[0];
+	float deltaY = header.maxBox[1] - header.minBox[1];
+	size = 7.5f / ((deltaX+deltaY)/2);
+#else
+	float offsetX = 0.0f;
+	float offsetY = 0.0f;
+	float offsetZ = 0.0f;
+#endif
+
 	for(dword i = 0; i < header.numVertices; i ++)
-		out << "v " << vertices(i)->vertexPosition[0]*size << " " << vertices(i)->vertexPosition[1]*size << " " << vertices(i)->vertexPosition[2]*size << endl;
+		out << "v " << (vertices(i)->vertexPosition[0]+offsetX)*size << " " << (vertices(i)->vertexPosition[1]+offsetY)*size << " " << (vertices(i)->vertexPosition[2]+offsetZ)*size << endl;
 	for(dword i = 0; i < header.numVertices; i ++)
 		out << "vt " << vertices(i)->vertexUV[0] << " " << vertices(i)->vertexUV[1] << endl;
 	for(dword i = 0; i < header.numVertices; i ++)
 		out << "vn " << vertices(i)->vertexNormal[0] << " " << vertices(i)->vertexNormal[1] << " " << vertices(i)->vertexNormal[2] << endl;
+#if 0 // Export tangents
+	for(dword i = 0; i < header.numVertices; i ++)
+		out << "tg " << vertices(i)->vertexTangent[0] << " " << vertices(i)->vertexTangent[1] << " " << vertices(i)->vertexTangent[2] << endl;
+#endif
 	for(dword i = 0; i < header.numSurfaces; i++)
 	{
 		out << "usemtl shape" << i << endl;
@@ -364,7 +528,7 @@ void TriFile::Export3ds(float size, string file, string dir)
 				strncpy_s(mesh->faceL[count].material, name.c_str(), sizeof(mesh->faceL[count].material));
 				mesh->faceL[count].points[0] = (word)triangles[i][c][0];
 				mesh->faceL[count].points[1] = (word)triangles[i][c][1];
-				mesh->faceL[count].points[2] = (word)triangles[i][c][2];	
+				mesh->faceL[count].points[2] = (word)triangles[i][c][2];
 				count++;
 		}
 	}
@@ -376,6 +540,10 @@ void TriFile::Export3ds(float size, string file, string dir)
 
 void TriFile::ExportA3D(float size, string file, string dir)
 {
+#if TANGENT_AND_BINORMAL
+	#error "Code not compatible with PNGBT header size yet"
+#endif
+
 	size *= 0.03f;
 	const byte allocInfo[] =   {(byte)0x04, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, 
 								(byte)0x08, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x70, (byte)0x6F, (byte)0x73, (byte)0x69, (byte)0x74, (byte)0x69, (byte)0x6F, (byte)0x6E, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, //position
@@ -387,15 +555,15 @@ void TriFile::ExportA3D(float size, string file, string dir)
 								(byte)0x07, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x74, (byte)0x61, (byte)0x6E, (byte)0x67, (byte)0x65, (byte)0x6E, (byte)0x74, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, //tangent
 								(byte)0x08, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x74, (byte)0x65, (byte)0x78, (byte)0x74, (byte)0x75, (byte)0x72, (byte)0x65, (byte)0x30, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};//texture0
 	const byte surfaceInfo[] = {(byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x04, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x08, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x6C, (byte)0x61, (byte)0x6D, (byte)0x62, (byte)0x65, (byte)0x72, (byte)0x74, (byte)0x31, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x09, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
-	const byte surfaceInfo2[] ={(byte)0x03, (byte)0x00,					        (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x04, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x08, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x6C, (byte)0x61, (byte)0x6D, (byte)0x62, (byte)0x65, (byte)0x72, (byte)0x74, (byte)0x31, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x09, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
+	const byte surfaceInfo2[] ={(byte)0x03, (byte)0x00,							(byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x04, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x08, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x6C, (byte)0x61, (byte)0x6D, (byte)0x62, (byte)0x65, (byte)0x72, (byte)0x74, (byte)0x31, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x09, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
 	ofstream out;
 	out.sync_with_stdio(false);
-	out.open(dir + file + ".a3d", std::ios::binary | std::ios::ate);
+	out.open((dir + file + ".a3d").c_str(), std::ios::binary | std::ios::ate);
 	const char android3d_ff[] = "Android3D_ff";
 	out.write(android3d_ff, sizeof(android3d_ff) - 1);
 	qword tmp64 = 44; //header len
 	char* tmp64aspointer = reinterpret_cast<char*>(&tmp64);
-	out.write(tmp64aspointer, sizeof(tmp64));				
+	out.write(tmp64aspointer, sizeof(tmp64));
 	dword tmp = 0; //version maj
 	char* tmpaspointer = reinterpret_cast<char*>(&tmp);
 	out.write(tmpaspointer, sizeof(tmp));
@@ -408,7 +576,7 @@ void TriFile::ExportA3D(float size, string file, string dir)
 	tmp = 11; //name len
 	out.write(tmpaspointer, sizeof(tmp));
 	const char name[] = "pTorus1Mesh";
-	out.write(name, sizeof(name));						
+	out.write(name, sizeof(name));
 	tmp = 1; //type mesh
 	out.write(tmpaspointer, sizeof(tmp));
 	tmp = 0; //Offest
@@ -448,20 +616,23 @@ void TriFile::ExportA3D(float size, string file, string dir)
 	out.write(tmpaspointer, sizeof(tmp));					//4
 	for(dword i = 0; i < header.numVertices; i ++)	//header.numVertices * 32
 	{
-		if(header.sizeVertex == 44){
-			const float tmpflo[] = {vertices<VertexPNTG>(i).vertexPosition[0]*size,
-			vertices<VertexPNTG>(i).vertexPosition[1]*size,
-			vertices<VertexPNTG>(i).vertexPosition[2]*size,
-			vertices<VertexPNTG>(i).vertexNormal[0],
-			vertices<VertexPNTG>(i).vertexNormal[1],
-			vertices<VertexPNTG>(i).vertexNormal[2],
-			vertices<VertexPNTG>(i).vertexTangent[0],
-			vertices<VertexPNTG>(i).vertexTangent[1],
-			vertices<VertexPNTG>(i).vertexTangent[2],
-			vertices<VertexPNTG>(i).vertexUV[0],
-			vertices<VertexPNTG>(i).vertexUV[1]};
+		if(header.sizeVertex == 44)
+		{
+			const float tmpflo[] = {vertices(i)->vertexPosition[0]*size,
+			vertices(i)->vertexPosition[1]*size,
+			vertices(i)->vertexPosition[2]*size,
+			vertices(i)->vertexNormal[0],
+			vertices(i)->vertexNormal[1],
+			vertices(i)->vertexNormal[2],
+			vertices(i)->vertexTangent[0],
+			vertices(i)->vertexTangent[1],
+			vertices(i)->vertexTangent[2],
+			vertices(i)->vertexUV[0],
+			vertices(i)->vertexUV[1]};
 			out.write(reinterpret_cast<const char*>(&tmpflo), sizeof(tmpflo));
-		} else {
+		}
+		else
+		{
 			const float tmpflo[] = {vertices(i)->vertexPosition[0]*size,
 			vertices(i)->vertexPosition[1]*size,
 			vertices(i)->vertexPosition[2]*size,
@@ -476,7 +647,7 @@ void TriFile::ExportA3D(float size, string file, string dir)
 	tmp = header.numSurfaces;
 	out.write(tmpaspointer, sizeof(tmp));					//4
 	lastmod = 0;
-	for(dword i = 0; i < header.numSurfaces; i++)   //header.numSurfaces * ...
+	for(dword i = 0; i < header.numSurfaces; i++)	//header.numSurfaces * ...
 	{
 		if(lastmod == 0)
 			out.write(reinterpret_cast<const char*>(&surfaceInfo), sizeof(surfaceInfo)); //sizeof(surfaceInfo)
@@ -524,6 +695,10 @@ FbxTexture* CreateTexture(FbxScene* pScene, const string &name, const string &fi
 }
 void TriFile::ExportFBX(float size, string file, string dir)
 {
+#if TANGENT_AND_BINORMAL
+	#error "Code not compatible with PNGBT header size yet"
+#endif
+
 	int lMajor, lMinor, lRevision;
 	FbxManager* pManager = FbxManager::Create();
 	if( !pManager )
@@ -560,18 +735,20 @@ void TriFile::ExportFBX(float size, string file, string dir)
 	for(dword i = 0; i < header.numVertices; i ++)	//header.numVertices * 32
 	{
 		if(header.sizeVertex == 44){
-			lControlPoints[i] = FbxVector4(vertices<VertexPNTG>(i).vertexPosition[0]*size,
-				vertices<VertexPNTG>(i).vertexPosition[1]*size,
-				vertices<VertexPNTG>(i).vertexPosition[2]*size);
-			lNormalElement->GetDirectArray().Add(FbxVector4(vertices<VertexPNTG>(i).vertexNormal[0],
-				vertices<VertexPNTG>(i).vertexNormal[1],
-				vertices<VertexPNTG>(i).vertexNormal[2]));
-			lUVElement->GetDirectArray().Add(FbxVector2(vertices<VertexPNTG>(i).vertexUV[0],
-				vertices<VertexPNTG>(i).vertexUV[1]));
+			lControlPoints[i] = FbxVector4(vertices(i)->vertexPosition[0]*size,
+				vertices(i)->vertexPosition[1]*size,
+				vertices(i)->vertexPosition[2]*size);
+			lNormalElement->GetDirectArray().Add(FbxVector4(vertices(i)->vertexNormal[0],
+				vertices(i)->vertexNormal[1],
+				vertices(i)->vertexNormal[2]));
+			// Tangents not exported ?
+			lUVElement->GetDirectArray().Add(FbxVector2(vertices(i)->vertexUV[0],
+				vertices(i)->vertexUV[1]));
 		} else {
 			lControlPoints[i] = FbxVector4(vertices(i)->vertexPosition[0]*size,
 				vertices(i)->vertexPosition[1]*size,
 				vertices(i)->vertexPosition[2]*size);
+			// Position as Normals ?!
 			lNormalElement->GetDirectArray().Add( FbxVector4(vertices(i)->vertexPosition[0],
 				vertices(i)->vertexPosition[1],
 				vertices(i)->vertexPosition[2]));

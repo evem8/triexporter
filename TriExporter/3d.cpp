@@ -35,7 +35,7 @@ LRESULT C3d::OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /
 
 LRESULT C3d::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	SAFE_RELEASE(mSwapChain);   
+	SAFE_RELEASE(mSwapChain);
 	SAFE_RELEASE(mDepthStencil);
 	SAFE_RELEASE(g_pD3D);
 	ClearTextures();
@@ -133,20 +133,20 @@ void C3d::Open(const TriFile &tfile)
 
 C3d::C3d(): mSwapChain(0), mDepthStencil(0), g_pd3dDevice(0), g_pD3D(0), g_pVB(0), loaded(false), distance(1.0f)
 {
-	d3dpp.BackBufferWidth            = 0;    
-	d3dpp.BackBufferHeight           = 0;   
-	d3dpp.BackBufferFormat           = D3DFMT_UNKNOWN;   
-	d3dpp.BackBufferCount            = 1;   
-	d3dpp.MultiSampleType            = D3DMULTISAMPLE_NONE;   
-	d3dpp.MultiSampleQuality         = 0;   
-	d3dpp.SwapEffect                 = D3DSWAPEFFECT_FLIP;    
-	d3dpp.hDeviceWindow              = m_hWnd;   
-	d3dpp.Windowed                   = true;   
-	d3dpp.EnableAutoDepthStencil     = true;    
-	//d3dpp.EnableAutoDepthStencil     = false;    
-	d3dpp.AutoDepthStencilFormat     = D3DFMT_D24S8;   
-	d3dpp.Flags                      = 0;   
-	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;   
+	d3dpp.BackBufferWidth            = 0;
+	d3dpp.BackBufferHeight           = 0;
+	d3dpp.BackBufferFormat           = D3DFMT_UNKNOWN;
+	d3dpp.BackBufferCount            = 1;
+	d3dpp.MultiSampleType            = D3DMULTISAMPLE_NONE;
+	d3dpp.MultiSampleQuality         = 0;
+	d3dpp.SwapEffect                 = D3DSWAPEFFECT_FLIP;
+	d3dpp.hDeviceWindow              = m_hWnd;
+	d3dpp.Windowed                   = true;
+	d3dpp.EnableAutoDepthStencil     = true;
+	//d3dpp.EnableAutoDepthStencil     = false;
+	d3dpp.AutoDepthStencilFormat     = D3DFMT_D24S8;
+	d3dpp.Flags                      = 0;
+	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 	d3dpp.PresentationInterval       = D3DPRESENT_INTERVAL_ONE;
 	g_pIB.resize(0);
 	g_pTexture.resize(0);
@@ -234,28 +234,28 @@ BOOL C3d::SubclassWindow(HWND hWnd)
 	return bRet;
 }
 
-void C3d::ReCreateBuffers(int w, int h)   
-{   
-	// Destroy the old ones.   
-	SAFE_RELEASE(mSwapChain);   
+void C3d::ReCreateBuffers(int w, int h)
+{
+	// Destroy the old ones.
+	SAFE_RELEASE(mSwapChain);
 	SAFE_RELEASE(mDepthStencil);
-	// Create the swapchain associated with this view object.   
+	// Create the swapchain associated with this view object.
 	d3dpp.hDeviceWindow    = m_hWnd;
-	d3dpp.BackBufferWidth  = w - 10;   
-	d3dpp.BackBufferHeight = h - 10;   
+	d3dpp.BackBufferWidth  = w - 10;
+	d3dpp.BackBufferHeight = h - 10;
 	g_pd3dDevice->CreateAdditionalSwapChain(&d3dpp, &mSwapChain);
-	g_pd3dDevice->CreateDepthStencilSurface(w, h, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &mDepthStencil, 0);   
+	g_pd3dDevice->CreateDepthStencilSurface(w, h, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &mDepthStencil, 0);
 	m_abArcBall.Size(w,h);
-}   
+}
 
 void C3d::Render()
 {
 	g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(100,100,255), 1.0f, 0);
-	IDirect3DSurface9* backbuffer = 0;   
-		mSwapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backbuffer);   
-		g_pd3dDevice->SetRenderTarget(0, backbuffer);   
-		g_pd3dDevice->SetDepthStencilSurface(mDepthStencil);   
-		SAFE_RELEASE(backbuffer);
+	IDirect3DSurface9* backbuffer = 0;
+	mSwapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backbuffer);
+	g_pd3dDevice->SetRenderTarget(0, backbuffer);
+	g_pd3dDevice->SetDepthStencilSurface(mDepthStencil);
+	SAFE_RELEASE(backbuffer);
 
 	if( SUCCEEDED( g_pd3dDevice->BeginScene() ) )
 	{
@@ -270,7 +270,14 @@ void C3d::Render()
 			g_pd3dDevice->SetTexture( 0, tmp );
 			g_pd3dDevice->SetIndices( g_pIB[i]);
 			if(loaded)
-				g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST,0,0,vcount,0,fcount[i]);
+			{
+				// Draw 10 surfaces based on selection in GUI
+				if( (9 >= i) && (1 == drawSurface[i]) )
+					g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST,0,0,vcount,0,fcount[i]);
+				// If we have more surfaces always draw them
+				else if ( 9 < i )
+					g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST,0,0,vcount,0,fcount[i]);
+			}
 		}
 		g_pd3dDevice->EndScene();
 	}

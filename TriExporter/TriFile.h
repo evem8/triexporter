@@ -25,12 +25,13 @@ struct Vertex
 {
 	float vertexPosition[3];
 	float vertexNormal[3];
-	float vertexUV[2];
-};
-
-struct VertexPNTG : Vertex
-{
+#if TANGENT_AND_BINORMAL
 	float vertexTangent[3];
+	float vertexBinormal[3];
+#elif TANGENT
+	float vertexTangent[3];
+#endif
+	float vertexUV[2];
 };
 
 //static const word vmaxsize = 128;
@@ -71,19 +72,16 @@ class TriFile
 		virtual bool LoadFile(string filename);
 		virtual bool LoadFile(ifstream &is);
 		void ExportX(float size, string file, string dir);
-		void ExportObj(float size, string file, string dir);	
+		void ExportObj(float size, string file, string dir);
 		void Export3ds(float size, string file, string dir);
 		void ExportMy(float size, string file, string dir);
+		void ExportVbo(float size, string file, string dir);
 		void ExportA3D(float size, string file, string dir);
 		void ExportFBX(float size, string file, string dir);
+
 		inline Vertex* vertices(int i) const
 		{
 			//return &m_vertices[i];
 			return reinterpret_cast<Vertex *>(reinterpret_cast<char *>(m_vertices) + i * header.sizeVertex);
-		}
-		
-		template<typename T> inline T vertices(int i) const
-		{
-			return reinterpret_cast<T *>(m_vertices)[i];
 		}
 };
