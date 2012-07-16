@@ -32,18 +32,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ilu", "ilu\ilu.vcxproj", "{
 		{C45F92CE-63BB-4C66-9C17-B4AAA18E46DD} = {C45F92CE-63BB-4C66-9C17-B4AAA18E46DD}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DX9", "DX9", "{4E8F17FF-74B3-4FE9-8097-F0697240F3A4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddraw", "ddraw", "{4E8F17FF-74B3-4FE9-8097-F0697240F3A4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grannystuff", "grannystuff", "{6A9CBFF4-978F-414E-B1CF-A5D4F460AD7B}"
 	ProjectSection(SolutionItems) = preProject
 		grannystuff\AutoGranny.h = grannystuff\AutoGranny.h
 		grannystuff\Granny.h = grannystuff\Granny.h
 		grannystuff\structs.h = grannystuff\structs.h
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{87C38431-67EE-4190-90A4-1B7ECEE8E754}"
-	ProjectSection(SolutionItems) = preProject
-		DX9\x86\ddraw.lib = DX9\x86\ddraw.lib
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WTL", "WTL", "{AB8B019B-491B-46E2-B786-905A42511E5B}"
@@ -77,6 +72,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{06C53E6C
 	ProjectSection(SolutionItems) = preProject
 		dxsdk.props = dxsdk.props
 		fbxsdk.props = fbxsdk.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{5C5E6EBC-6F9A-4039-85A8-F37BA9426D4D}"
+	ProjectSection(SolutionItems) = preProject
+		ddraw\x86\ddraw.lib = ddraw\x86\ddraw.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{1DCBC0C0-25F2-47AC-89BF-0705526429C9}"
+	ProjectSection(SolutionItems) = preProject
+		ddraw\x64\ddraw.lib = ddraw\x64\ddraw.lib
 	EndProjectSection
 EndProject
 Global
@@ -148,6 +153,7 @@ Global
 		{7959E0E7-4C8D-4E33-A94F-BB033F71DAD8} = {627A8A46-25D5-4E52-B547-BE0E76F64275}
 		{45D7E18B-52B5-4AF5-9BE4-E4356D217B32} = {627A8A46-25D5-4E52-B547-BE0E76F64275}
 		{C45F92CE-63BB-4C66-9C17-B4AAA18E46DD} = {627A8A46-25D5-4E52-B547-BE0E76F64275}
-		{87C38431-67EE-4190-90A4-1B7ECEE8E754} = {4E8F17FF-74B3-4FE9-8097-F0697240F3A4}
+		{5C5E6EBC-6F9A-4039-85A8-F37BA9426D4D} = {4E8F17FF-74B3-4FE9-8097-F0697240F3A4}
+		{1DCBC0C0-25F2-47AC-89BF-0705526429C9} = {4E8F17FF-74B3-4FE9-8097-F0697240F3A4}
 	EndGlobalSection
 EndGlobal
