@@ -62,7 +62,7 @@ void StuffFile::LoadFile(const string &filename)
 		in->read(reinterpret_cast<char *>(&files[filescount+i]), 2*sizeof(dword));
 		in->read(reinterpret_cast<char *>(fn), files[filescount+i].filenameLength+1);
 		files[filescount+i].filename = fn;
-		transform(files[filescount+i].filename.begin(), files[filescount+i].filename.end(), files[filescount+i].filename.begin(), (int(*)(int))std::tolower);
+		//transform(files[filescount+i].filename.begin(), files[filescount+i].filename.end(), files[filescount+i].filename.begin(), (int(*)(int))std::tolower);
 		for_each(files[filescount+i].filename.begin(), files[filescount+i].filename.end(), func);
 		files[filescount+i].fileOffset = offset;
 		files[filescount+i].handle = in;

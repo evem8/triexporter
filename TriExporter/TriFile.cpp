@@ -229,6 +229,8 @@ void TriFile::ExportMy(float size, string file, string dir)
 {
 	ofstream out;
 	out.sync_with_stdio(false);
+	out.open((dir + file + ".my").c_str(), std::ios::ate);
+	/*
 	out.open((dir + file + ".my").c_str(), std::ios::binary | std::ios::ate);
 	out.write(reinterpret_cast<char*>(&header.numVertices), sizeof(dword)) ;
 	for(dword i = 0; i < header.numVertices; i ++)
@@ -262,8 +264,32 @@ void TriFile::ExportMy(float size, string file, string dir)
 				out.write(reinterpret_cast<char*>(&p), sizeof(dword));
 			}
 		}
+	}*/
+	out << "Position=\"";
+	for(dword i = 0; i < header.numVertices; i ++)
+	{
+		out << " " << fixed << setprecision(6) << vertices(i)->vertexPosition[0]*size << " " << setprecision(6) << vertices(i)->vertexPosition[1]*size << " " << setprecision(6) << vertices(i)->vertexPosition[2]*size;
 	}
-	
+	out << "\"" << endl;
+	out << "Normals=\"";
+	for(dword i = 0; i < header.numVertices; i ++)
+	{
+		out << " " << fixed << setprecision(6) << vertices(i)->vertexNormal[0]*size << ", " << setprecision(6) << vertices(i)->vertexNormal[1]*size << ", " << setprecision(6) << vertices(i)->vertexPosition[2]*size;
+	}
+	out << "\"" << endl;
+	out << "TriangleIndices=\"";
+	for(dword i = 0; i < header.numSurfaces; i++)
+	{
+		for(dword c = 0; c < surfaces[i].numTriangles; c ++)
+		{
+			for(int d = 0; d < 3; d++)
+			{
+				dword p = triangles[i][c][d];
+				out << p << " ";
+			}
+		}
+	}
+	out << "\"" << endl;
 	out.close();
 }
 
