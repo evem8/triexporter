@@ -64,7 +64,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration);..\ddraw\x86;$(DXSDKPath)\Lib\x86;$(FBXSDKPath)\lib\vs2010\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlib.lib;libpng.lib;DevIL.lib;ilu.lib;lib3ds.lib;ddraw.lib;d3d9.lib;Winmm.lib;fbxsdk-2013.2-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zlib.lib;libpng.lib;DevIL.lib;ilu.lib;lib3ds.lib;d3d9.lib;Winmm.lib;fbxsdk-2013.2-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -86,7 +86,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration);..\ddraw\x86;$(DXSDKPath)\Lib\x86;$(FBXSDKPath)\lib\vs2010\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlib.lib;libpng.lib;DevIL.lib;ilu.lib;lib3ds.lib;ddraw.lib;d3d9.lib;Winmm.lib;fbxsdk-2013.2-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zlib.lib;libpng.lib;DevIL.lib;ilu.lib;lib3ds.lib;d3d9.lib;Winmm.lib;fbxsdk-2013.2-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkStatus>true</LinkStatus>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
