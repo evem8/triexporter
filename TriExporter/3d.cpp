@@ -35,8 +35,8 @@ LRESULT C3d::OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /
 
 LRESULT C3d::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	SAFE_RELEASE(mSwapChain);
-	SAFE_RELEASE(mDepthStencil);
+	//SAFE_RELEASE(mSwapChain);
+	//SAFE_RELEASE(mDepthStencil);
 	SAFE_RELEASE(g_pD3D);
 	ClearTextures();
 	Cleanup();
@@ -90,11 +90,21 @@ void C3d::Open(const TriFile &tfile)
 	if( FAILED( g_pVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
 		return;
 	vcount = tfile.header.numVertices;
-	for( DWORD i=0; i<tfile.header.numVertices; i++ )
+	if(tfile.hasTangentsBinormals)
 	{
-		pVertices[i].position = tfile.vertices(i)->vertexPosition;
-		pVertices[i].normal   = tfile.vertices(i)->vertexNormal;
-		pVertices[i].uv   = tfile.vertices(i)->vertexUV;
+		for( DWORD i=0; i<tfile.header.numVertices; i++ )
+		{
+			pVertices[i].position = tfile.verticestb(i)->vertexPosition;
+			pVertices[i].normal   = tfile.verticestb(i)->vertexNormal;
+			pVertices[i].uv   = tfile.verticestb(i)->vertexUV;
+		}
+	}else{
+		for( DWORD i=0; i<tfile.header.numVertices; i++ )
+		{
+			pVertices[i].position = tfile.verticesc(i)->vertexPosition;
+			pVertices[i].normal   = tfile.verticesc(i)->vertexNormal;
+			pVertices[i].uv   = tfile.verticesc(i)->vertexUV;
+		}
 	}
 	ComputeBoundingSphere(pVertices, vcount, &vCenter, &vRadius);
 	g_pVB->Unlock();
@@ -131,7 +141,9 @@ void C3d::Open(const TriFile &tfile)
 	loaded = true;
 }
 
-C3d::C3d(): mSwapChain(0), mDepthStencil(0), g_pd3dDevice(0), g_pD3D(0), g_pVB(0), loaded(false), distance(1.0f)
+C3d::C3d():
+//mSwapChain(0), mDepthStencil(0), 
+g_pd3dDevice(0), g_pD3D(0), g_pVB(0), loaded(false), distance(1.0f)
 {
 	d3dpp.BackBufferWidth            = 0;
 	d3dpp.BackBufferHeight           = 0;
@@ -144,7 +156,7 @@ C3d::C3d(): mSwapChain(0), mDepthStencil(0), g_pd3dDevice(0), g_pD3D(0), g_pVB(0
 	d3dpp.Windowed                   = true;
 	d3dpp.EnableAutoDepthStencil     = true;
 	//d3dpp.EnableAutoDepthStencil     = false;
-	d3dpp.AutoDepthStencilFormat     = D3DFMT_D24S8;
+	d3dpp.AutoDepthStencilFormat     = D3DFMT_D24X8;
 	d3dpp.Flags                      = 0;
 	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 	d3dpp.PresentationInterval       = D3DPRESENT_INTERVAL_ONE;
@@ -222,7 +234,7 @@ void C3d::SetupMatrices()
 	MatrixLookAtLH(&matView, &vEyePt, &vLookatPt, &vUpVec );
 	g_pd3dDevice->SetTransform( D3DTS_VIEW, &matView );
 	D3DXMATRIXA16 matProj;
-	MatrixPerspectiveFovLH( &matProj, D3DX_PI/5, 1.0f, 1.0f, vRadius*20);// 10.0f );
+	MatrixPerspectiveFovLH( &matProj, D3DX_PI/5, Aspect, 1.0f, vRadius*20);// 10.0f );
 	g_pd3dDevice->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
@@ -237,25 +249,26 @@ BOOL C3d::SubclassWindow(HWND hWnd)
 void C3d::ReCreateBuffers(int w, int h)
 {
 	// Destroy the old ones.
-	SAFE_RELEASE(mSwapChain);
-	SAFE_RELEASE(mDepthStencil);
+	//SAFE_RELEASE(mSwapChain);
+	//SAFE_RELEASE(mDepthStencil);
+	Aspect = (float)w/(float)h;
 	// Create the swapchain associated with this view object.
 	d3dpp.hDeviceWindow    = m_hWnd;
-	d3dpp.BackBufferWidth  = w - 10;
-	d3dpp.BackBufferHeight = h - 10;
-	g_pd3dDevice->CreateAdditionalSwapChain(&d3dpp, &mSwapChain);
-	g_pd3dDevice->CreateDepthStencilSurface(w, h, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &mDepthStencil, 0);
+	d3dpp.BackBufferWidth  = w;
+	d3dpp.BackBufferHeight = h;
+	//g_pd3dDevice->CreateAdditionalSwapChain(&d3dpp, &mSwapChain);
+	//g_pd3dDevice->CreateDepthStencilSurface(w, h, D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, true, &mDepthStencil, 0);
 	m_abArcBall.Size(w,h);
 }
 
 void C3d::Render()
 {
 	g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(100,100,255), 1.0f, 0);
-	IDirect3DSurface9* backbuffer = 0;
-	mSwapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backbuffer);
-	g_pd3dDevice->SetRenderTarget(0, backbuffer);
-	g_pd3dDevice->SetDepthStencilSurface(mDepthStencil);
-	SAFE_RELEASE(backbuffer);
+	//IDirect3DSurface9* backbuffer = 0;
+	//mSwapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backbuffer);
+	//g_pd3dDevice->SetRenderTarget(0, backbuffer);
+	//g_pd3dDevice->SetDepthStencilSurface(mDepthStencil);
+	//SAFE_RELEASE(backbuffer);
 
 	if( SUCCEEDED( g_pd3dDevice->BeginScene() ) )
 	{
@@ -281,8 +294,8 @@ void C3d::Render()
 		}
 		g_pd3dDevice->EndScene();
 	}
-	//g_pd3dDevice->Present(0, 0, 0, 0);
-	mSwapChain->Present(0, 0, m_hWnd, 0, 0);
+	g_pd3dDevice->Present(0, 0, 0, 0);
+	//mSwapChain->Present(0, 0, m_hWnd, 0, 0);
 	//mSwapChain->Present(0, 0, 0, 0, 0);
 }
 

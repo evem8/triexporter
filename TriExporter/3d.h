@@ -19,8 +19,8 @@ class C3d : public CWindowImpl<C3d>
 {
 public:
 	D3DPRESENT_PARAMETERS d3dpp;
-	IDirect3DSwapChain9* mSwapChain; 
-	IDirect3DSurface9* mDepthStencil; 
+	//IDirect3DSwapChain9* mSwapChain; 
+	//IDirect3DSurface9* mDepthStencil; 
 	LPDIRECT3D9						g_pD3D;
 	LPDIRECT3DDEVICE9				g_pd3dDevice;
 	LPDIRECT3DVERTEXBUFFER9			g_pVB ;
@@ -41,6 +41,7 @@ public:
 	D3DXMATRIXA16 matWorld;
 	D3DLIGHT9 light;
 	FLOAT vRadius;
+	FLOAT Aspect;
 	BEGIN_MSG_MAP(C3d)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		MESSAGE_HANDLER(WM_MOUSEMOVE, OnMouseMove)

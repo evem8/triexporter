@@ -25,12 +25,15 @@ struct Vertex
 {
 	float vertexPosition[3];
 	float vertexNormal[3];
-#if TANGENT_AND_BINORMAL
+	float vertexUV[2];
+};
+
+struct VertexTB
+{
+	float vertexPosition[3];
+	float vertexNormal[3];
 	float vertexTangent[3];
 	float vertexBinormal[3];
-#elif TANGENT
-	float vertexTangent[3];
-#endif
 	float vertexUV[2];
 };
 
@@ -58,6 +61,7 @@ struct Surface
 class TriFile
 {
 	public:
+		bool hasTangentsBinormals;
 		Header header;
 		Vertex *m_vertices;
 		vector<Surface> surfaces;
@@ -79,9 +83,15 @@ class TriFile
 		void ExportA3D(float size, string file, string dir);
 		void ExportFBX(float size, string file, string dir);
 
-		inline Vertex* vertices(int i) const
+		inline Vertex* verticesc(int i) const
 		{
 			//return &m_vertices[i];
 			return reinterpret_cast<Vertex *>(reinterpret_cast<char *>(m_vertices) + i * header.sizeVertex);
+		}
+
+		inline VertexTB* verticestb(int i) const
+		{
+			//return &m_vertices[i];
+			return reinterpret_cast<VertexTB *>(reinterpret_cast<char *>(m_vertices) + i * header.sizeVertex);
 		}
 };

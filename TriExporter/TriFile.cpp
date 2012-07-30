@@ -56,22 +56,33 @@ bool TriFile::LoadFile(ifstream &is)
 	if(header.versionLo != 4 && header.versionHi != 1)
 		return false;
 	surfaces.resize(header.numSurfaces);
+	//sorry, actually we need this for loading old tri files :)
+	//we should prolly add SCALE_AND_CENTER and vertextype as TriFile propertis
+	//instead #define
 	switch(header.sizeVertex)
 	{
-#if TANGENT_AND_BINORMAL
-		case 56: /* PNGBT */
-#elif TANGENT
-		case 44: /* PNGT */
-#else
-		case 32: /* PNT */
-#endif
+		case 32:
 			m_vertices = new Vertex[header.numVertices];
 			break;
-
+		case 40:
+			m_vertices = new CVertex<40>[header.numVertices];
+			break;
+		case 48:
+			m_vertices = new CVertex<48>[header.numVertices];
+			break;
+		case 56:
+			m_vertices = new CVertex<56>[header.numVertices];
+			break;
+		case 64:
+			m_vertices = new CVertex<64>[header.numVertices];
+			break;
+		case 72:
+			m_vertices = new CVertex<72>[header.numVertices];
+			break;
 		default:
 			return false;
 	}
-	
+	hasTangentsBinormals = false;
 	int r = header.sizeVertex*header.numVertices;
 	is.read(reinterpret_cast<char*>(m_vertices), r);
 	r = sizeof(surfaces[0])*header.numSurfaces;
@@ -156,9 +167,9 @@ void TriFile::ExportX(float size, string file, string dir)
 	for(dword i = 0; i < header.numVertices; i ++)
 	{
 		if((i+1) != header.numVertices)
-			out << " " << fixed << setprecision(6) << vertices(i)->vertexPosition[0]*size << ";" << setprecision(6) << vertices(i)->vertexPosition[1]*size << ";" << setprecision(6) << vertices(i)->vertexPosition[2]*size << xlend <<endl;
+			out << " " << fixed << setprecision(6) << verticesc(i)->vertexPosition[0]*size << ";" << setprecision(6) << verticesc(i)->vertexPosition[1]*size << ";" << setprecision(6) << verticesc(i)->vertexPosition[2]*size << xlend <<endl;
 		else
-			out << " " << setprecision(6) << vertices(i)->vertexPosition[0]*size << ";" << setprecision(6) << vertices(i)->vertexPosition[1]*size << ";" << setprecision(6) << vertices(i)->vertexPosition[2]*size << xlendlast <<endl;
+			out << " " << setprecision(6) << verticesc(i)->vertexPosition[0]*size << ";" << setprecision(6) << verticesc(i)->vertexPosition[1]*size << ";" << setprecision(6) << verticesc(i)->vertexPosition[2]*size << xlendlast <<endl;
 	}
 	out << numTriangles << ";" << endl;
 	for(dword i = 0; i < header.numSurfaces; i++)
@@ -176,9 +187,9 @@ void TriFile::ExportX(float size, string file, string dir)
 	for(dword i = 0; i < header.numVertices; i ++)
 	{
 		if((i+1) != header.numVertices)
-			out << "  "  << fixed << setprecision(6) << vertices(i)->vertexNormal[0] << ";" << setprecision(6) << vertices(i)->vertexNormal[1] << ";" << setprecision(6) << vertices(i)->vertexNormal[2] << xlend << endl;
+			out << "  "  << fixed << setprecision(6) << verticesc(i)->vertexNormal[0] << ";" << setprecision(6) << verticesc(i)->vertexNormal[1] << ";" << setprecision(6) << verticesc(i)->vertexNormal[2] << xlend << endl;
 		else
-			out << "  " << setprecision(6) << vertices(i)->vertexNormal[0] << ";" << setprecision(6) << vertices(i)->vertexNormal[1] << ";" << setprecision(6) << vertices(i)->vertexNormal[2] << xlendlast << endl;
+			out << "  " << setprecision(6) << verticesc(i)->vertexNormal[0] << ";" << setprecision(6) << verticesc(i)->vertexNormal[1] << ";" << setprecision(6) << verticesc(i)->vertexNormal[2] << xlendlast << endl;
 	}
 	out << numTriangles << ";" << endl;
 	for(dword i = 0; i < header.numSurfaces; i++)
@@ -196,9 +207,9 @@ void TriFile::ExportX(float size, string file, string dir)
 	for(dword i = 0; i < header.numVertices; i ++)
 	{
 		if((i+1) != header.numVertices)
-			out << fixed << setprecision(6) <<  vertices(i)->vertexUV[0] << "; " << setprecision(6) <<  vertices(i)->vertexUV[1] << xlend << endl;
+			out << fixed << setprecision(6) <<  verticesc(i)->vertexUV[0] << "; " << setprecision(6) <<  verticesc(i)->vertexUV[1] << xlend << endl;
 		else
-			out << setprecision(6) << vertices(i)->vertexUV[0] << "; " << setprecision(6) <<  vertices(i)->vertexUV[1] << xlendlast << endl;
+			out << setprecision(6) << verticesc(i)->vertexUV[0] << "; " << setprecision(6) <<  verticesc(i)->vertexUV[1] << xlendlast << endl;
 	}
 	out << "}\n\nMeshMaterialList {\n" << header.numSurfaces << ";\n" << numTriangles << ";" << endl;
 	for(dword i = 0; i < header.numSurfaces; i++)
@@ -221,6 +232,7 @@ void TriFile::ExportX(float size, string file, string dir)
 
 void TriFile::ExportMy(float size, string file, string dir)
 {
+	//actually this is usles ... just tests for: simple format or WPF Geometry ... i'll get rid of it from menu
 	ofstream out;
 	out.sync_with_stdio(false);
 	out.open((dir + file + ".my").c_str(), std::ios::ate);
@@ -262,13 +274,13 @@ void TriFile::ExportMy(float size, string file, string dir)
 	out << "Position=\"";
 	for(dword i = 0; i < header.numVertices; i ++)
 	{
-		out << " " << fixed << setprecision(6) << vertices(i)->vertexPosition[0]*size << " " << setprecision(6) << vertices(i)->vertexPosition[1]*size << " " << setprecision(6) << vertices(i)->vertexPosition[2]*size;
+		out << " " << fixed << setprecision(6) << verticesc(i)->vertexPosition[0]*size << " " << setprecision(6) << verticesc(i)->vertexPosition[1]*size << " " << setprecision(6) << verticesc(i)->vertexPosition[2]*size;
 	}
 	out << "\"" << endl;
 	out << "Normals=\"";
 	for(dword i = 0; i < header.numVertices; i ++)
 	{
-		out << " " << fixed << setprecision(6) << vertices(i)->vertexNormal[0]*size << ", " << setprecision(6) << vertices(i)->vertexNormal[1]*size << ", " << setprecision(6) << vertices(i)->vertexPosition[2]*size;
+		out << " " << fixed << setprecision(6) << verticesc(i)->vertexNormal[0]*size << ", " << setprecision(6) << verticesc(i)->vertexNormal[1]*size << ", " << setprecision(6) << verticesc(i)->vertexPosition[2]*size;
 	}
 	out << "\"" << endl;
 	out << "TriangleIndices=\"";
@@ -379,32 +391,32 @@ void TriFile::ExportVbo(float size, string file, string dir)
 	for(dword i = 0; i < header.numVertices; i ++)
 	{
 		// Write vertex_coordinates
-		float fo = (vertices(i)->vertexPosition[0]+offsetX)*mesh_scale;
+		float fo = (verticesc(i)->vertexPosition[0]+offsetX)*mesh_scale;
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
-		fo = (vertices(i)->vertexPosition[1]+offsetY)*mesh_scale;
+		fo = (verticesc(i)->vertexPosition[1]+offsetY)*mesh_scale;
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
-		fo = (vertices(i)->vertexPosition[2]+offsetZ)*mesh_scale;
+		fo = (verticesc(i)->vertexPosition[2]+offsetZ)*mesh_scale;
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
 
 		// Write vertex_normals
-		fo = vertices(i)->vertexNormal[0];
+		fo = verticesc(i)->vertexNormal[0];
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
-		fo = vertices(i)->vertexNormal[1];
+		fo = verticesc(i)->vertexNormal[1];
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
-		fo = vertices(i)->vertexNormal[2];
+		fo = verticesc(i)->vertexNormal[2];
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
 
 		// Write vertex_uv
-		fo =  vertices(i)->vertexUV[0];
+		fo =  verticesc(i)->vertexUV[0];
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
-		fo =  vertices(i)->vertexUV[1];
+		fo =  verticesc(i)->vertexUV[1];
 		swap_endian(fo);
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
 	}
@@ -464,12 +476,12 @@ void TriFile::ExportObj(float size, string file, string dir)
 #endif
 
 	for(dword i = 0; i < header.numVertices; i ++)
-		out << "v " << (vertices(i)->vertexPosition[0]+offsetX)*size << " " << (vertices(i)->vertexPosition[1]+offsetY)*size << " " << (vertices(i)->vertexPosition[2]+offsetZ)*size << endl;
+		out << "v " << (verticesc(i)->vertexPosition[0]+offsetX)*size << " " << (verticesc(i)->vertexPosition[1]+offsetY)*size << " " << (verticesc(i)->vertexPosition[2]+offsetZ)*size << endl;
 	for(dword i = 0; i < header.numVertices; i ++)
-		out << "vt " << vertices(i)->vertexUV[0] << " " << vertices(i)->vertexUV[1] << endl;
+		out << "vt " << verticesc(i)->vertexUV[0] << " " << verticesc(i)->vertexUV[1] << endl;
 	for(dword i = 0; i < header.numVertices; i ++)
-		out << "vn " << vertices(i)->vertexNormal[0] << " " << vertices(i)->vertexNormal[1] << " " << vertices(i)->vertexNormal[2] << endl;
-#if 0 // Export tangents
+		out << "vn " << verticesc(i)->vertexNormal[0] << " " << verticesc(i)->vertexNormal[1] << " " << verticesc(i)->vertexNormal[2] << endl;
+#if 0 // Export tangents // there is no tg element in obj file... i think
 	for(dword i = 0; i < header.numVertices; i ++)
 		out << "tg " << vertices(i)->vertexTangent[0] << " " << vertices(i)->vertexTangent[1] << " " << vertices(i)->vertexTangent[2] << endl;
 #endif
@@ -499,11 +511,11 @@ void TriFile::Export3ds(float size, string file, string dir)
 	Lib3dsPoint* pointL = mesh->pointL;
 	for(dword i = 0; i < header.numVertices; i ++)
 	{
-		mesh->pointL[i].pos[0] = vertices(i)->vertexPosition[0]*size;
-		mesh->pointL[i].pos[1] = vertices(i)->vertexPosition[1]*size;
-		mesh->pointL[i].pos[2] = vertices(i)->vertexPosition[2]*size;
-		mesh->texelL[i][0] = vertices(i)->vertexUV[0];
-		mesh->texelL[i][1] = vertices(i)->vertexUV[1];
+		mesh->pointL[i].pos[0] = verticesc(i)->vertexPosition[0]*size;
+		mesh->pointL[i].pos[1] = verticesc(i)->vertexPosition[1]*size;
+		mesh->pointL[i].pos[2] = verticesc(i)->vertexPosition[2]*size;
+		mesh->texelL[i][0] = verticesc(i)->vertexUV[0];
+		mesh->texelL[i][1] = verticesc(i)->vertexUV[1];
 	}
 	int count = 0;
 	lib3ds_mesh_new_face_list(mesh, numTriangles);
@@ -540,10 +552,6 @@ void TriFile::Export3ds(float size, string file, string dir)
 
 void TriFile::ExportA3D(float size, string file, string dir)
 {
-#if TANGENT_AND_BINORMAL
-	#error "Code not compatible with PNGBT header size yet"
-#endif
-
 	size *= 0.03f;
 	const byte allocInfo[] =   {(byte)0x04, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, 
 								(byte)0x08, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x70, (byte)0x6F, (byte)0x73, (byte)0x69, (byte)0x74, (byte)0x69, (byte)0x6F, (byte)0x6E, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x02, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, //position
@@ -616,31 +624,31 @@ void TriFile::ExportA3D(float size, string file, string dir)
 	out.write(tmpaspointer, sizeof(tmp));					//4
 	for(dword i = 0; i < header.numVertices; i ++)	//header.numVertices * 32
 	{
-		if(header.sizeVertex == 44)
+		if(hasTangentsBinormals)
 		{
-			const float tmpflo[] = {vertices(i)->vertexPosition[0]*size,
-			vertices(i)->vertexPosition[1]*size,
-			vertices(i)->vertexPosition[2]*size,
-			vertices(i)->vertexNormal[0],
-			vertices(i)->vertexNormal[1],
-			vertices(i)->vertexNormal[2],
-			vertices(i)->vertexTangent[0],
-			vertices(i)->vertexTangent[1],
-			vertices(i)->vertexTangent[2],
-			vertices(i)->vertexUV[0],
-			vertices(i)->vertexUV[1]};
+			const float tmpflo[] = {verticestb(i)->vertexPosition[0]*size,
+			verticestb(i)->vertexPosition[1]*size,
+			verticestb(i)->vertexPosition[2]*size,
+			verticestb(i)->vertexNormal[0],
+			verticestb(i)->vertexNormal[1],
+			verticestb(i)->vertexNormal[2],
+			verticestb(i)->vertexTangent[0],
+			verticestb(i)->vertexTangent[1],
+			verticestb(i)->vertexTangent[2],
+			verticestb(i)->vertexUV[0],
+			verticestb(i)->vertexUV[1]};
 			out.write(reinterpret_cast<const char*>(&tmpflo), sizeof(tmpflo));
 		}
 		else
 		{
-			const float tmpflo[] = {vertices(i)->vertexPosition[0]*size,
-			vertices(i)->vertexPosition[1]*size,
-			vertices(i)->vertexPosition[2]*size,
-			vertices(i)->vertexNormal[0],
-			vertices(i)->vertexNormal[1],
-			vertices(i)->vertexNormal[2],
-			vertices(i)->vertexUV[0],
-			vertices(i)->vertexUV[1]};
+			const float tmpflo[] = {verticesc(i)->vertexPosition[0]*size,
+			verticesc(i)->vertexPosition[1]*size,
+			verticesc(i)->vertexPosition[2]*size,
+			verticesc(i)->vertexNormal[0],
+			verticesc(i)->vertexNormal[1],
+			verticesc(i)->vertexNormal[2],
+			verticesc(i)->vertexUV[0],
+			verticesc(i)->vertexUV[1]};
 			out.write(reinterpret_cast<const char*>(&tmpflo), sizeof(tmpflo));
 		}
 	}
@@ -695,10 +703,6 @@ FbxTexture* CreateTexture(FbxScene* pScene, const string &name, const string &fi
 }
 void TriFile::ExportFBX(float size, string file, string dir)
 {
-#if TANGENT_AND_BINORMAL
-	#error "Code not compatible with PNGBT header size yet"
-#endif
-
 	int lMajor, lMinor, lRevision;
 	FbxManager* pManager = FbxManager::Create();
 	if( !pManager )
@@ -727,6 +731,12 @@ void TriFile::ExportFBX(float size, string file, string dir)
 	lMesh->InitControlPoints(header.numVertices);
 	FbxVector4* lControlPoints = lMesh->GetControlPoints();
 	FbxGeometryElementNormal* lNormalElement = lMesh->CreateElementNormal();
+	FbxGeometryElementTangent* lTangentElement = NULL;
+	if(hasTangentsBinormals){
+		lTangentElement = lMesh->CreateElementTangent();
+		lTangentElement->SetMappingMode(FbxGeometryElement::eByControlPoint);
+		lTangentElement->SetReferenceMode(FbxGeometryElement::eDirect);
+	}
 	lNormalElement->SetMappingMode(FbxGeometryElement::eByControlPoint);
 	lNormalElement->SetReferenceMode(FbxGeometryElement::eDirect);
 	FbxGeometryElementUV* lUVElement = lMesh->CreateElementUV("UV1");
@@ -734,26 +744,29 @@ void TriFile::ExportFBX(float size, string file, string dir)
 	lUVElement->SetReferenceMode(FbxGeometryElement::eDirect);
 	for(dword i = 0; i < header.numVertices; i ++)	//header.numVertices * 32
 	{
-		if(header.sizeVertex == 44){
-			lControlPoints[i] = FbxVector4(vertices(i)->vertexPosition[0]*size,
-				vertices(i)->vertexPosition[1]*size,
-				vertices(i)->vertexPosition[2]*size);
-			lNormalElement->GetDirectArray().Add(FbxVector4(vertices(i)->vertexNormal[0],
-				vertices(i)->vertexNormal[1],
-				vertices(i)->vertexNormal[2]));
+		if(hasTangentsBinormals){
+			lControlPoints[i] = FbxVector4(verticestb(i)->vertexPosition[0]*size,
+				verticestb(i)->vertexPosition[1]*size,
+				verticestb(i)->vertexPosition[2]*size);
+			lNormalElement->GetDirectArray().Add(FbxVector4(verticestb(i)->vertexNormal[0],
+				verticestb(i)->vertexNormal[1],
+				verticestb(i)->vertexNormal[2]));
 			// Tangents not exported ?
-			lUVElement->GetDirectArray().Add(FbxVector2(vertices(i)->vertexUV[0],
-				vertices(i)->vertexUV[1]));
+			lUVElement->GetDirectArray().Add(FbxVector2(verticestb(i)->vertexUV[0],
+				verticestb(i)->vertexUV[1]));
+			lTangentElement->GetDirectArray().Add(FbxVector4(verticestb(i)->vertexTangent[0],
+				verticestb(i)->vertexTangent[1],
+				verticestb(i)->vertexTangent[2]));
 		} else {
-			lControlPoints[i] = FbxVector4(vertices(i)->vertexPosition[0]*size,
-				vertices(i)->vertexPosition[1]*size,
-				vertices(i)->vertexPosition[2]*size);
-			// Position as Normals ?!
-			lNormalElement->GetDirectArray().Add( FbxVector4(vertices(i)->vertexPosition[0],
-				vertices(i)->vertexPosition[1],
-				vertices(i)->vertexPosition[2]));
-			lUVElement->GetDirectArray().Add( FbxVector2(vertices(i)->vertexUV[0],
-				vertices(i)->vertexUV[1]));
+			lControlPoints[i] = FbxVector4(verticesc(i)->vertexPosition[0]*size,
+				verticesc(i)->vertexPosition[1]*size,
+				verticesc(i)->vertexPosition[2]*size);
+			// Position as Normals ?! :) Selvin: my bad, copy-paste programming :)
+			lNormalElement->GetDirectArray().Add( FbxVector4(verticesc(i)->vertexNormal[0],
+				verticesc(i)->vertexNormal[1],
+				verticesc(i)->vertexNormal[2]));
+			lUVElement->GetDirectArray().Add( FbxVector2(verticesc(i)->vertexUV[0],
+				verticesc(i)->vertexUV[1]));
 		}
 	}
 		FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();

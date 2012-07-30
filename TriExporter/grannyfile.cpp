@@ -21,13 +21,11 @@ bool GrannyTriFile::LoadFile(StuffFileEntry &sfe)
 	header.numVertices = (*GrannyGetMeshVertexCount)(mesh);
 	t_Groups* triangleGroups = (*GrannyGetMeshTriangleGroups)(mesh);
 
-#if TANGENT_AND_BINORMAL
+	//ok for now we load gr2 with Tangents and Binormals
+	//so size is always 56 ...
 	header.sizeVertex = 56;
-#elif TANGENT
-	header.sizeVertex = 44;
-#else
-	header.sizeVertex = 32;
-#endif
+	//but we have also flag and we set it only in "TriFile" loaded from gr2 not wrom old .tri file
+	hasTangentsBinormals = true;
 
 	numTriangles = (*GrannyGetMeshTriangleCount)(mesh);
 	header.numTriangles = numTriangles;
@@ -53,16 +51,9 @@ bool GrannyTriFile::LoadFile(StuffFileEntry &sfe)
 			triangles[i][j][2] = ind[w+2];
 		}
 	}
-	m_vertices = new Vertex[header.numVertices];
-
-#if TANGENT_AND_BINORMAL
+	m_vertices =  new CVertex<56>[header.numVertices];
+	//ok for now we load gr2 with Tangents and Binormals
 	(*GrannyCopyMeshVertices)(mesh, GrannyPNGBT33332VertexType, m_vertices);
-#elif TANGENT
-	(*GrannyCopyMeshVertices)(mesh, GrannyPNGT3332VertexType, m_vertices);
-#else
-	(*GrannyCopyMeshVertices)(mesh, GrannyPNT332VertexType, m_vertices);
-#endif
-
 	(*GrannyFreeFile)(file);
 
 	// Calculate values of bounding box
