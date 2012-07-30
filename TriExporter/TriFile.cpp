@@ -204,12 +204,22 @@ void TriFile::ExportX(float size, string file, string dir)
 	}
 	out << "}\n\n MeshTextureCoords {" << endl;
 	out << "  " <<header.numVertices << ";" << endl;
-	for(dword i = 0; i < header.numVertices; i ++)
-	{
-		if((i+1) != header.numVertices)
-			out << fixed << setprecision(6) <<  verticesc(i)->vertexUV[0] << "; " << setprecision(6) <<  verticesc(i)->vertexUV[1] << xlend << endl;
-		else
-			out << setprecision(6) << verticesc(i)->vertexUV[0] << "; " << setprecision(6) <<  verticesc(i)->vertexUV[1] << xlendlast << endl;
+	if(hasTangentsBinormals){
+		for(dword i = 0; i < header.numVertices; i ++)
+		{
+			if((i+1) != header.numVertices)
+				out << fixed << setprecision(6) <<  verticestb(i)->vertexUV[0] << "; " << setprecision(6) <<  verticestb(i)->vertexUV[1] << xlend << endl;
+			else
+				out << setprecision(6) << verticestb(i)->vertexUV[0] << "; " << setprecision(6) <<  verticestb(i)->vertexUV[1] << xlendlast << endl;
+		}
+	} else {
+		for(dword i = 0; i < header.numVertices; i ++)
+		{
+			if((i+1) != header.numVertices)
+				out << fixed << setprecision(6) <<  verticesc(i)->vertexUV[0] << "; " << setprecision(6) <<  verticesc(i)->vertexUV[1] << xlend << endl;
+			else
+				out << setprecision(6) << verticesc(i)->vertexUV[0] << "; " << setprecision(6) <<  verticesc(i)->vertexUV[1] << xlendlast << endl;
+		}
 	}
 	out << "}\n\nMeshMaterialList {\n" << header.numSurfaces << ";\n" << numTriangles << ";" << endl;
 	for(dword i = 0; i < header.numSurfaces; i++)
@@ -413,12 +423,21 @@ void TriFile::ExportVbo(float size, string file, string dir)
 		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
 
 		// Write vertex_uv
-		fo =  verticesc(i)->vertexUV[0];
-		swap_endian(fo);
-		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
-		fo =  verticesc(i)->vertexUV[1];
-		swap_endian(fo);
-		out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		if(hasTangentsBinormals){
+			fo =  verticestb(i)->vertexUV[0];
+			swap_endian(fo);
+			out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+			fo =  verticestb(i)->vertexUV[1];
+			swap_endian(fo);
+			out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		} else {
+			fo =  verticesc(i)->vertexUV[0];
+			swap_endian(fo);
+			out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+			fo =  verticesc(i)->vertexUV[1];
+			swap_endian(fo);
+			out.write(reinterpret_cast<char*>(&fo), sizeof(float));
+		}
 	}
 
 	// For all surfaces
@@ -477,8 +496,13 @@ void TriFile::ExportObj(float size, string file, string dir)
 
 	for(dword i = 0; i < header.numVertices; i ++)
 		out << "v " << (verticesc(i)->vertexPosition[0]+offsetX)*size << " " << (verticesc(i)->vertexPosition[1]+offsetY)*size << " " << (verticesc(i)->vertexPosition[2]+offsetZ)*size << endl;
-	for(dword i = 0; i < header.numVertices; i ++)
-		out << "vt " << verticesc(i)->vertexUV[0] << " " << verticesc(i)->vertexUV[1] << endl;
+	if(hasTangentsBinormals){
+		for(dword i = 0; i < header.numVertices; i ++)
+			out << "vt " << verticestb(i)->vertexUV[0] << " " << verticestb(i)->vertexUV[1] << endl;
+	} else {
+		for(dword i = 0; i < header.numVertices; i ++)
+			out << "vt " << verticesc(i)->vertexUV[0] << " " << verticesc(i)->vertexUV[1] << endl;
+	}
 	for(dword i = 0; i < header.numVertices; i ++)
 		out << "vn " << verticesc(i)->vertexNormal[0] << " " << verticesc(i)->vertexNormal[1] << " " << verticesc(i)->vertexNormal[2] << endl;
 #if 0 // Export tangents // there is no tg element in obj file... i think
@@ -514,8 +538,13 @@ void TriFile::Export3ds(float size, string file, string dir)
 		mesh->pointL[i].pos[0] = verticesc(i)->vertexPosition[0]*size;
 		mesh->pointL[i].pos[1] = verticesc(i)->vertexPosition[1]*size;
 		mesh->pointL[i].pos[2] = verticesc(i)->vertexPosition[2]*size;
-		mesh->texelL[i][0] = verticesc(i)->vertexUV[0];
-		mesh->texelL[i][1] = verticesc(i)->vertexUV[1];
+		if(hasTangentsBinormals){
+			mesh->texelL[i][0] = verticestb(i)->vertexUV[0];
+			mesh->texelL[i][1] = verticestb(i)->vertexUV[1];
+		} else {
+			mesh->texelL[i][0] = verticesc(i)->vertexUV[0];
+			mesh->texelL[i][1] = verticesc(i)->vertexUV[1];
+		}
 	}
 	int count = 0;
 	lib3ds_mesh_new_face_list(mesh, numTriangles);
