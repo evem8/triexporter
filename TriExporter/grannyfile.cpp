@@ -61,7 +61,7 @@ bool GrannyTriFile::LoadFile(StuffFileEntry &sfe)
 	{
 		for (unsigned int x = 0; x < 3 ; x++)
 		{
-			float currpos = m_vertices[i].vertexPosition[x];
+			float currpos = verticesc(i)->vertexPosition[x];
 
 			if(header.minBox[x] > currpos)
 				header.minBox[x] = currpos;
