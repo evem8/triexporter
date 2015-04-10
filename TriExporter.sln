@@ -73,35 +73,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{06C53E6C
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 7
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs21
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = DevIL\\DevIL.vcxproj
-		SccProjectTopLevelParentUniqueName1 = TriExporter.sln
-		SccProjectName1 = DevIL
-		SccLocalPath1 = DevIL
-		SccProjectUniqueName2 = ilu\\ilu.vcxproj
-		SccProjectTopLevelParentUniqueName2 = TriExporter.sln
-		SccProjectName2 = ilu
-		SccLocalPath2 = ilu
-		SccProjectUniqueName3 = lib3ds\\lib3ds.vcxproj
-		SccProjectTopLevelParentUniqueName3 = TriExporter.sln
-		SccProjectName3 = lib3ds
-		SccLocalPath3 = lib3ds
-		SccProjectUniqueName4 = libpng\\libpng.vcxproj
-		SccProjectTopLevelParentUniqueName4 = TriExporter.sln
-		SccProjectName4 = libpng
-		SccLocalPath4 = libpng
-		SccProjectUniqueName5 = TriExporter\\TriExporter.vcxproj
-		SccProjectName5 = TriExporter
-		SccLocalPath5 = TriExporter
-		SccProjectUniqueName6 = zlib\\zlib.vcxproj
-		SccProjectTopLevelParentUniqueName6 = TriExporter.sln
-		SccProjectName6 = zlib
-		SccLocalPath6 = zlib
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
