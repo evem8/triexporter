@@ -33,10 +33,14 @@ TriFile::~TriFile()
 	Clear();
 }
 
-bool TriFile::LoadFile(StuffFileEntry &sfe)
+bool TriFile::LoadFile(CacheEntry &sce)
 {
-	sfe.handle->seekg(sfe.fileOffset);
-	return LoadFile((*sfe.handle));
+	ifstream is;
+	is.sync_with_stdio(false);
+	is.open (sce.cachename.c_str(), ios::binary|ios::in);
+	bool ret = LoadFile(is);
+	is.close();
+	return ret;
 }
 
 bool TriFile::LoadFile(string filename)

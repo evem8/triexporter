@@ -4,17 +4,21 @@
 #include <grannystuff/Granny.h>
 #include <vector>
 
-bool GrannyTriFile::LoadFile(StuffFileEntry &sfe)
+bool GrannyTriFile::LoadFile(CacheEntry &sce)
 {
 	if(!dllloaded)
 		return false;
 	Clear();
 	std::vector<char> mem;
-	mem.resize(sfe.fileSize);
-	sfe.handle->seekg(sfe.fileOffset);
-	sfe.handle->read(reinterpret_cast<char*>(&mem[0]), sfe.fileSize);
-	GrannyFile* file = (*GrannyReadEntireFileFromMemory)(sfe.fileSize, reinterpret_cast<char*>(&mem[0]));
+	mem.resize(sce.fileSize);
+	ifstream is;
+	is.sync_with_stdio(false);
+	is.open(sce.cachename.c_str(), ios::binary|ios::in);
+	is.read(reinterpret_cast<char*>(&mem[0]), sce.fileSize);
+	is.close();
+	GrannyFile* file = (*GrannyReadEntireFileFromMemory)(sce.fileSize, reinterpret_cast<char*>(&mem[0]));
 	mem.clear();
+
 	t_FileInfo* modelinfo = (*GrannyGetFileInfo)(file);
 	t_Meshes* mesh = modelinfo->Meshes[0];
 
@@ -73,11 +77,11 @@ bool GrannyTriFile::LoadFile(StuffFileEntry &sfe)
 	return true;
 }
 
-
 bool GrannyTriFile::LoadFile(string filename)
 {
 	return false;
 }
+
 bool GrannyTriFile::LoadFile(std::ifstream &is)
 {
 	return false;

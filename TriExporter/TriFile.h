@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stufffile.h"
+#include "SharedCache.h"
 
 #pragma pack(push, 1)
 
@@ -72,7 +72,7 @@ class TriFile
 		TriFile():numTriangles(0), m_vertices(NULL){ ZeroMemory(&header, sizeof(Header));}
 		void Clear();
 		virtual ~TriFile();
-		virtual bool LoadFile(StuffFileEntry &sfe);
+		virtual bool LoadFile(CacheEntry &sce);
 		virtual bool LoadFile(string filename);
 		virtual bool LoadFile(ifstream &is);
 		void ExportX(float size, string file, string dir);

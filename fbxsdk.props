@@ -2,6 +2,6 @@
 <Project ToolsVersion="4.0"
    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <FBXSDKPath>D:\Autodesk\FBX\FBX SDK\2013.2</FBXSDKPath>
+    <FBXSDKPath>C:\Program Files\Autodesk\FBX\FBX SDK\2013.3</FBXSDKPath>
   </PropertyGroup>
 </Project>

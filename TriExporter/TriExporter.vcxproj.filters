@@ -57,16 +57,10 @@
     <ClInclude Include="MainDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StuffDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StuffFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TriFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnstuffDlg.h">
+    <ClInclude Include="SharedCache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,10 +83,10 @@
     <ClCompile Include="MainDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StuffFile.cpp">
+    <ClCompile Include="TriFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TriFile.cpp">
+    <ClCompile Include="SharedCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

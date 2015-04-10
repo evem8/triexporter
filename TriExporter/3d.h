@@ -1,7 +1,7 @@
 #pragma once
 
 #include "arcball.h"
-#include "StuffFile.h"
+#include "SharedCache.h"
 #include "TriFile.h"
 
 #define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1)
@@ -65,7 +65,7 @@ public:
 	LRESULT OnDestroy(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	void ClearTextures();
 	void ClearIndexes();
-	void TextureChange(const StuffFile &sf, const vector<int> &textures);
+	void TextureChange(const SharedCache &sc,const vector<int> &textures);
 	void Open(const TriFile &tfile);
 	C3d();
 	void SwapTexture(int x, int y);

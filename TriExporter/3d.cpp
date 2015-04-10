@@ -55,7 +55,7 @@ void C3d::ClearIndexes()
 		SAFE_RELEASE(g_pIB[i]);
 }
 
-void C3d::TextureChange(const StuffFile &sf,const vector<int> &textures)
+void C3d::TextureChange(const SharedCache &sc,const vector<int> &textures)
 {
 	ClearTextures();
 	for(unsigned int i=0; i < g_pTexture.size(); i++)
@@ -65,9 +65,12 @@ void C3d::TextureChange(const StuffFile &sf,const vector<int> &textures)
 		if(index > -1)
 		{
 			vector<byte> data;
-			data.resize(sf.files[index].fileSize);
-			sf.files[index].handle->seekg(sf.files[index].fileOffset);
-			sf.files[index].handle->read(reinterpret_cast<char*>(&data[0]), sf.files[index].fileSize);
+			data.resize(sc.index[index].fileSize);
+			ifstream is;
+			is.sync_with_stdio(false);
+			is.open(sc.index[index].cachename.c_str(), ios::binary|ios::in);
+			is.read(reinterpret_cast<char*>(&data[0]), sc.index[index].fileSize);
+			is.close();			
 			LPDIRECT3DTEXTURE9 tmp;
 			if(LoadTextureFromMemory(g_pd3dDevice, &data[0], &tmp))
 				g_pTexture[i] = tmp;

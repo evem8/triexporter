@@ -8,7 +8,6 @@
 #include "TriFile.h"
 #include "3d.h"
 #include "AboutDlg.h"
-#include "UnstuffDlg.h"
 
 class CMainDlg : public CDialogImpl<CMainDlg>,
 		// public CUpdateUI<CMainDlg>,
@@ -38,7 +37,7 @@ private:
 	CButton m_Select;
 	CButton m_ChkSurfaces[10];
 	TriFile* file;
-	StuffFile sf;
+	SharedCache sc;
 	CImageList il;
 	CTreeViewCtrlEx m_Tree;
 	map<string, HTREEITEM> lvis;
@@ -55,7 +54,6 @@ public:
 		COMMAND_ID_HANDLER(IDC_ADD, OnAdd)
 		COMMAND_ID_HANDLER(ID_FILE_SETFOLDER, OnSetFolder)
 		COMMAND_ID_HANDLER(ID_FILE_EXPORTMOD, OnExport)
-		COMMAND_ID_HANDLER(ID_FILE_UNSTUFF, OnUnstuff)
 		COMMAND_ID_HANDLER(ID_FILE_WIREON, OnWireOnOff)
 		COMMAND_ID_HANDLER(ID_FILE_OPENTRI, OnOpenTri)
 		COMMAND_ID_HANDLER(IDC_REMOVE, OnRemove)
@@ -96,7 +94,6 @@ public:
 	LRESULT OnScaleTrack(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnSelect(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnExport(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
-	LRESULT OnUnstuff(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnWireOnOff(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	void Add(const CString &texture,int data = -1);
 	LRESULT OnAdd(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);

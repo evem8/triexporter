@@ -13,7 +13,7 @@ LRESULT CMainDlg::OnTreeDblClick(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& bHandle
 		int out = ti.GetData()-1;
 		if(out>=0)
 		{
-			CString f = sf.files[out].filename.c_str();
+			CString f = sc.index[out].filename.c_str();
 			if(!f.Right(4).Compare(".tri"))
 			{
 				delete file;
@@ -25,7 +25,7 @@ LRESULT CMainDlg::OnTreeDblClick(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& bHandle
 				if(loaded)
 				{
 					Add(f.Right(f.GetLength()-f.ReverseFind('/')-1), out);
-					m_p3d.TextureChange(sf, texdata);
+					m_p3d.TextureChange(sc, texdata);
 				}
 			}
 			else if(!f.Right(4).Compare(".gr2"))
@@ -56,7 +56,7 @@ void CMainDlg::Load(string &out)
 	}
 	SurType.Format("%i", file->surfaces[0].surfaceType);
 	EnableAll();
-	CString title = "TriExporter";
+	CString title = "TriExporter_sharedcache";
 	title += " - ";
 	title += out.c_str();
 	SetWindowText(title);
@@ -93,16 +93,16 @@ void CMainDlg::Load(int out)
 {
 
 	CString SurType;
-	if(!file->LoadFile(sf.files[out]))
+	if(!file->LoadFile(sc.index[out]))
 	{
 		MessageBox("Model not loaded", "Error", MB_ICONERROR | MB_OK);
 		return;
 	}
 	SurType.Format("%i", file->surfaces[0].surfaceType);
 	EnableAll();
-	CString title = "TriExporter";
+	CString title = "TriExporter_sharedcache";
 	title += " - ";
-	title += sf.files[out].filename.c_str();
+	title += sc.index[out].filename.c_str();
 	SetWindowText(title);
 	m_p3d.Open(*file);
 	textures.clear();
@@ -165,8 +165,10 @@ LRESULT CMainDlg::OnSetFolder(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl
 		rk.Create(HKEY_CURRENT_USER, "Software\\TriExporter");
 		rk.SetStringValue("EVE", fd.m_szFolderPath);
 		rk.Close();
-		sf.LoadDir(fd.m_szFolderPath);
-		FillTree();
+		if (sc.LoadDir(fd.m_szFolderPath))
+			FillTree();
+		else
+			MessageBox("Unable to load SharedCache", "Error", MB_ICONERROR | MB_OK);
 	}
 	return TRUE;
 }
@@ -279,44 +281,6 @@ LRESULT CMainDlg::OnExport(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
 	return 0;
 }
 
-LRESULT CMainDlg::OnUnstuff(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	CTreeItem ti = m_Tree.GetSelectedItem();
-	CFolderDialog fd(m_hWnd, "Select folder. The files will be unstuffed there:");
-	if(fd.DoModal(m_hWnd)!= IDCANCEL)
-	{
-		CString path = fd.m_szFolderPath;
-		if(ti)
-		{
-			int out = ti.GetData()-1;
-			if(out >= 0)
-			{
-				sf.files[out].Unstuff(path);
-			}
-			else
-			{
-				CUnstuffDlg dlg;
-				DWORD data[4];
-				CString start;
-				data[0] = (DWORD)&ti;
-				data[1] = (DWORD)&sf;
-				data[2] = (DWORD)&path;
-				CTreeItem tmpti = ti;
-				while(tmpti = tmpti.GetParent())
-				{
-					CString tmp;
-					tmpti.GetText(tmp);
-					start = tmp + "/" + start;
-				}
-				data[3] = (DWORD)&start;
-				dlg.DoModal(m_hWnd, (LPARAM)data);
-			}
-		}	
-	}
-	MessageBox("Unstuffed done", "Information", MB_ICONINFORMATION|MB_OK);
-	return 0;
-}
-
 void CMainDlg::ExportTextures(const CString &path)
 {
 	ILuint handle;
@@ -333,17 +297,20 @@ void CMainDlg::ExportTextures(const CString &path)
 			CString file;
 			m_Textures.GetText(i, file);
 			vector<char> data;
-			data.resize(sf.files[texdata[i]].fileSize);
-			sf.files[texdata[i]].handle->seekg(sf.files[texdata[i]].fileOffset);
-			sf.files[texdata[i]].handle->read(reinterpret_cast<char*>(&data[0]), sf.files[texdata[i]].fileSize);
-			ILboolean ret = ilLoadL(IL_DDS, reinterpret_cast<char*>(&data[0]), sf.files[texdata[i]].fileSize);
+			data.resize(sc.index[texdata[i]].fileSize);
+			ifstream is;
+			is.sync_with_stdio(false);
+			is.open(sc.index[texdata[i]].cachename.c_str(), ios::binary|ios::in);
+			is.read(reinterpret_cast<char*>(&data[0]), sc.index[texdata[i]].fileSize);
+			is.close();
+			ILboolean ret = ilLoadL(IL_DDS, reinterpret_cast<char*>(&data[0]), sc.index[texdata[i]].fileSize);
 			file.Replace(".dds", ".png");
 			iluFlipImage();
 			ilSaveImage((path + file));
 			/*ofstream out;
 			out.sync_with_stdio(false);
 			out.open(path + file, ios::binary);
-			out.write(reinterpret_cast<char*>(&data[0]), sf.files[texdata[i]].fileSize);
+			out.write(reinterpret_cast<char*>(&data[0]), sc.index[texdata[i]].fileSize);
 			out.close();*/
 			ilDeleteImages(1, & handle);
 		}
@@ -380,7 +347,7 @@ LRESULT CMainDlg::OnAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BO
 	CString texture;
 	m_Texture.GetWindowText(texture);
 	Add(texture);
-	m_p3d.TextureChange(sf, texdata);
+	m_p3d.TextureChange(sc, texdata);
 	return 0;
 }
 
@@ -409,7 +376,7 @@ LRESULT CMainDlg::OnRemove(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
 			}
 		}
 		FillTextures();
-		m_p3d.TextureChange(sf, texdata);
+		m_p3d.TextureChange(sc, texdata);
 	}
 	return 0;
 }
@@ -443,7 +410,7 @@ void CMainDlg::EnableAll(BOOL bEnable)
 	else
 	{
 		menu.EnableMenuItem(ID_FILE_EXPORTMOD, MF_GRAYED);
-		SetWindowText("TriExporter");
+		SetWindowText("TriExporter_sharedcache");
 	}
 }
 
@@ -453,9 +420,9 @@ void CMainDlg::FillTree()
 	lvis.clear();
 	string old = "";
 	lvis[old] = TVI_ROOT;
-	for(dword i = 0; i < sf.files.size(); i++)
+	for(dword i = 0; i < sc.index.size(); i++)
 	{
-		CString f = sf.files[i].filename.c_str();
+		CString f = sc.index[i].filename.c_str();
 		//f.Replace('\\', '/');
 		int u = 0;
 		while((u = f.Find('/', u+1)) != -1)
@@ -470,9 +437,9 @@ void CMainDlg::FillTree()
 			old = n;
 		}
 	}
-	for(dword i = 0; i < sf.files.size(); i++)
+	for(dword i = 0; i < sc.index.size(); i++)
 	{
-		CString f = sf.files[i].filename.c_str();
+		CString f = sc.index[i].filename.c_str();
 		//f.Replace('\\', '/');
 		int u = 0;
 		while((u = f.Find('/', u+1)) != -1)
@@ -487,7 +454,7 @@ void CMainDlg::FillTree()
 			old = n;
 		}
 		CString fil;
-		fil.Format("%s - %1.2fKB", f.Right(f.GetLength()-f.ReverseFind('/')-1), sf.files[i].fileSize/1024.0);
+		fil.Format("%s - %1.2fKB", f.Right(f.GetLength()-f.ReverseFind('/')-1), sc.index[i].fileSize/1024.0);
 		CTreeItem fe;
 		HTREEITEM order = TVI_LAST; //TVI_SORT
 		if(!f.Right(4).Compare(".dds"))
@@ -581,8 +548,8 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		TCHAR path[256];
 		rk.QueryStringValue("EVE", path, &g);
 		rk.Close();
-		sf.LoadDir(path);
-		FillTree();
+		if (sc.LoadDir(path))
+			FillTree();
 	}
 	m_p3d.Render();
 	EnableAll(FALSE);
