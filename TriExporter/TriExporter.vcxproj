@@ -117,6 +117,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TriExporter.h" />
     <ClInclude Include="TriFile.h" />
+    <ClInclude Include="UnstuffDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3d.cpp" />

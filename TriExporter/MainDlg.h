@@ -8,6 +8,7 @@
 #include "TriFile.h"
 #include "3d.h"
 #include "AboutDlg.h"
+#include "UnstuffDlg.h"
 
 class CMainDlg : public CDialogImpl<CMainDlg>,
 		// public CUpdateUI<CMainDlg>,
@@ -46,7 +47,6 @@ private:
 	bool loaded;
 public:
 	BEGIN_MSG_MAP(CMainDlg)
-		NOTIFY_HANDLER(IDC_TREE, NM_DBLCLK, OnTreeDblClick)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		//MESSAGE_HANDLER(WM_SIZE, OnResize)
 		COMMAND_ID_HANDLER(ID_HELP_ABOUT, OnAppAbout)
@@ -69,9 +69,14 @@ public:
 		COMMAND_ID_HANDLER(IDC_SURFACE9, OnSurfaces)
 		COMMAND_ID_HANDLER(IDC_SURFACE10, OnSurfaces)
 		COMMAND_ID_HANDLER(ID_FILE_EXIT, OnCancel)
+		COMMAND_ID_HANDLER(ID_FILE_SAVEFILE, OnSaveFile)
+		COMMAND_ID_HANDLER(ID_FOLDER_SAVEFOLDER, OnSaveFolder)
+		COMMAND_ID_HANDLER(ID_FILE_SAVESEL, OnSaveSelected)
 		MESSAGE_HANDLER(WM_HSCROLL, OnScaleTrack)
 		MESSAGE_HANDLER(WM_VSCROLL, OnScaleTrack)
+		NOTIFY_HANDLER(IDC_TREE, NM_DBLCLK, OnTreeDblClick)
 		NOTIFY_HANDLER(IDC_TREE, TVN_KEYDOWN, OnTvnKeydownTree)
+		NOTIFY_HANDLER(IDC_TREE, NM_RCLICK, OnTreeRClick)
 		//CHAIN_MSG_MAP(CDialogResize<CMainDlg>)
 	END_MSG_MAP()
 	//BEGIN_UPDATE_UI_MAP(CMainDlg)
@@ -107,7 +112,11 @@ public:
 	LRESULT OnCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	void CloseDialog(int nVal);
 	LRESULT OnTvnKeydownTree(int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled);
+	LRESULT OnTreeRClick(int idCtrl, LPNMHDR pnmh, BOOL& bHandled);
 	void FillTextures();
 	void ExportTextures(const CString &path);
 	void UpdateFPS();
+	LRESULT OnSaveFile(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnSaveFolder(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnSaveSelected(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 };

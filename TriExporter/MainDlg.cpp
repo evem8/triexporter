@@ -617,3 +617,93 @@ LRESULT CMainDlg::OnTvnKeydownTree(int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled)
 		OnTreeDblClick(idCtrl, pNMHDR, bHandled);
 	return 0;
 }
+
+LRESULT CMainDlg::OnTreeRClick(int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled)
+{
+	DWORD dwPos = GetMessagePos();
+	POINT pt = {GET_X_LPARAM(dwPos), GET_Y_LPARAM(dwPos)};
+
+	UINT uFlags;
+	m_Tree.ScreenToClient(&pt);
+	HTREEITEM htItem = m_Tree.HitTest(pt, &uFlags);
+	if (htItem)
+	{
+		m_Tree.SelectItem(htItem);
+
+		CTreeItem ti = m_Tree.GetSelectedItem();
+		if(ti)
+		{
+			int out = ti.GetData()-1;
+			CMenu menu, pPopup;
+			menu.LoadMenu(IDR_CONTEXTMENU);
+			pPopup = menu.GetSubMenu((out >= 0) ? 0 : 1);
+			m_Tree.ClientToScreen(&pt);
+			pPopup.TrackPopupMenu(TPM_LEFTALIGN, pt.x, pt.y, m_hWnd);
+		}
+	}
+
+	return 0;
+}
+
+LRESULT CMainDlg::OnSaveFile(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+{
+	CTreeItem ti = m_Tree.GetSelectedItem();
+	if(ti)
+	{
+		int out = ti.GetData()-1;
+		if(out >= 0)
+		{
+			CFileDialog fd(false, NULL, PathFindFileName(sc.index[out].filename.c_str()), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("All Files (*.*)"), m_hWnd);
+			if(fd.DoModal(m_hWnd) != IDCANCEL)
+			{
+				sc.SaveFile(sc.index[out], fd.m_szFileName);
+			}
+		}
+	}
+
+	return 0;
+}
+
+LRESULT CMainDlg::OnSaveFolder(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+{
+	CTreeItem ti = m_Tree.GetSelectedItem();
+	if(ti)
+	{
+		int out = ti.GetData()-1;
+		if(out < 0)
+		{
+			CFolderDialog fd(m_hWnd, "Select folder to save files:");
+			if(fd.DoModal(m_hWnd) != IDCANCEL)
+			{
+				CString path = fd.m_szFolderPath;
+				CUnstuffDlg dlg; 
+				DWORD data[3]; 
+				data[0] = (DWORD)&ti;
+				data[1] = (DWORD)&sc;
+				data[2] = (DWORD)&path;
+				dlg.DoModal(m_hWnd, (LPARAM)data); 
+			}
+		}
+	}
+
+	return 0;
+}
+
+LRESULT CMainDlg::OnSaveSelected(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+{
+	CTreeItem ti = m_Tree.GetSelectedItem();
+	if(ti)
+	{
+		int out = ti.GetData()-1;
+		if(out >= 0)
+		{
+			OnSaveFile(wNotifyCode, wID, hWndCtl, bHandled);
+		}
+		else
+		{
+			OnSaveFolder(wNotifyCode, wID, hWndCtl, bHandled);
+		}
+	}
+
+	return 0;
+}

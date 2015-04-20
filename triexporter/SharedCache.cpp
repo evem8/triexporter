@@ -48,3 +48,43 @@ bool SharedCache::LoadDir(string eveDir)
 
 	return loadedDir && loadedIndex;
 }
+
+void SharedCache::SaveFile(CacheEntry file, CString path, bool folder)
+{
+	CString outpath;
+	if (folder)
+	{
+		CString filename = file.filename.c_str();
+		if (filename.Left(4).Compare("res:") == 0)
+		{
+			filename = filename.Mid(4);
+		}
+		filename.Replace("/", "\\");
+		outpath = path + filename;
+
+		int s = 1;
+		while ((s = filename.Find("\\", s+1)) >= 0)
+		{
+			CString dir = path + filename.Left(s);
+			CreateDirectory(dir, NULL);
+		}
+	}
+	else
+	{
+		outpath = path;
+	}
+
+	vector<char> data;
+	data.resize(file.fileSize);
+	ifstream is;
+	is.sync_with_stdio(false);
+	is.open(file.cachename.c_str(), ios::binary|ios::in);
+	is.read(reinterpret_cast<char*>(&data[0]), file.fileSize);
+	is.close();
+
+	ofstream fout;
+	fout.sync_with_stdio(false);
+	fout.open(outpath, ios::binary);
+	fout.write(reinterpret_cast<char*>(&data[0]), file.fileSize);
+	fout.close();
+}
